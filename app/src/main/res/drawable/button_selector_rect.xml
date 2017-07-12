@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:state_pressed="false">
+        <shape android:shape="rectangle">
+            <solid android:color="#bababa" />
+            <size android:width="@dimen/normalImageButtonWidth" android:height="@dimen/normalImageButtonWidth" />
+            <corners android:radius="@dimen/normalImageButtonCorner" />
+        </shape>
+    </item>
+
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="@color/colorAccent" />
+            <size android:width="@dimen/normalImageButtonWidth" android:height="@dimen/normalImageButtonHeight" />
+            <corners android:radius="@dimen/normalImageButtonCorner" />
+        </shape>
+    </item>
+</selector>

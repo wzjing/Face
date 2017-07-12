@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.wzjing.face.MyGLSurfaceView
+        android:id="@+id/cameraGSV"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageButton
+        android:id="@+id/shootIBtn"
+        android:layout_width="@dimen/normalImageButtonWidth"
+        android:layout_height="@dimen/normalImageButtonHeight"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/button_selector_rect"
+        android:contentDescription="@string/imageButtonContent"
+        android:padding="5dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_vector_video_rec"
+        android:transitionName="@string/shareVideoImageElement"
+        android:elevation="4dp"
+        android:stateListAnimator="@animator/state_list_animator"/>
+
+</RelativeLayout>

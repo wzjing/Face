@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Face</string>
+    <string name="locationInfoText">Location info</string>
+    <string name="videoRecBtn">Video</string>
+    <string name="audioRecBtn">Audio</string>
+    <string name="imageButtonContent">ImageButton</string>
+    <string name="shareVideoImageElement">videoImageElement</string>
+</resources>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="largeImageButtonWidth">60dp</dimen>
+    <dimen name="largeImageButtonHeight">40dp</dimen>
+    <dimen name="largeImageButtonMargin">8dp</dimen>
+    <dimen name="normalImageButtonWidth">40dp</dimen>
+    <dimen name="normalImageButtonHeight">40dp</dimen>
+    <dimen name="normalImageButtonCorner">6dp</dimen>
+</resources>

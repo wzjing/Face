@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.wzjing.face.MainActivity">
+
+    <GridLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:columnCount="3">
+
+        <ImageButton
+            android:id="@+id/videoRecBtn"
+            android:layout_width="@dimen/largeImageButtonWidth"
+            android:layout_height="@dimen/largeImageButtonHeight"
+            android:layout_margin="@dimen/largeImageButtonMargin"
+            android:background="@drawable/button_selector_rect"
+            android:contentDescription="@string/imageButtonContent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_vector_video_rec" />
+
+        <ImageButton
+            android:id="@+id/audioRecBtn"
+            android:layout_width="@dimen/largeImageButtonWidth"
+            android:layout_height="@dimen/largeImageButtonHeight"
+            android:layout_margin="@dimen/largeImageButtonMargin"
+            android:background="@drawable/button_selector_rect"
+            android:contentDescription="@string/imageButtonContent"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_vector_audio_rec" />
+    </GridLayout>
+
+
+</RelativeLayout>
