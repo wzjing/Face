@@ -101,7 +101,7 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
 //            Imgproc.rectangle(aInputFrame, facesArray[i].tl(), facesArray[i].br(), Scalar(0.0, 255.0, 0.0, 255.0), 3)
 
 
-//        rotateFrame(aInputFrame.nativeObj, -90)
+        rotateFrame(aInputFrame.nativeObj, -90)
 //        Core.transpose(aInputFrame, aInputFrame)
         Imgproc.rectangle(aInputFrame, Point(100.0, 100.0), Point(200.0, 200.0), Scalar(255.0, 0.0, 0.0), 5)
         Log.i(TAG, "rotate finished")

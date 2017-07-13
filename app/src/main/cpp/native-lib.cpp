@@ -10,6 +10,6 @@ JNIEXPORT void JNICALL
 Java_com_wzjing_face_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree) {
     cv::Mat* mat = (cv::Mat *) frame;
     LOGI(ATAG, "frame_size:%d x %d\n", mat->rows, mat->cols);
-//    cvCvtColor(mat, mat, CV_BGR2GRAY);
+    cvCvtColor(mat, mat, CV_BGR2GRAY);
 //    cvFlip(mat, mat, 1);
 }
