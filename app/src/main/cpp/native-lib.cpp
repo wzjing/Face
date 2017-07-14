@@ -7,9 +7,11 @@ Java_com_wzjing_face_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */)
 }
 
 JNIEXPORT void JNICALL
-Java_com_wzjing_face_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree) {
-    cv::Mat* mat = (cv::Mat *) frame;
-    LOGI(ATAG, "frame_size:%d x %d\n", mat->rows, mat->cols);
-    cvCvtColor(mat, mat, CV_BGR2GRAY);
-//    cvFlip(mat, mat, 1);
+Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree) {
+    using namespace cv;
+    Mat* src = (Mat *) frame;
+//    cvtColor(*src, *src, CV_BGR2GRAY);
+    circle(*src, Point_<int>(100,200), 100, Scalar_<int>(255, 0, 0), 5);
+//    transpose(*src, *src);
+//    flip(*src, *src, 0);
 }

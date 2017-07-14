@@ -1,13 +1,13 @@
-package com.wzjing.face
+package com.wzjing.face.opencvcamera
 
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.WindowManager
+import com.wzjing.face.R
 import org.opencv.android.*
 import org.opencv.core.*
-import org.opencv.imgproc.Imgproc
 import org.opencv.objdetect.CascadeClassifier
 import java.io.File
 import java.io.FileOutputStream
@@ -100,10 +100,9 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
 //        for (i in facesArray.indices)
 //            Imgproc.rectangle(aInputFrame, facesArray[i].tl(), facesArray[i].br(), Scalar(0.0, 255.0, 0.0, 255.0), 3)
 
-
+        Log.i(TAG, "______________________________________________")
         rotateFrame(aInputFrame.nativeObj, -90)
-//        Core.transpose(aInputFrame, aInputFrame)
-        Imgproc.rectangle(aInputFrame, Point(100.0, 100.0), Point(200.0, 200.0), Scalar(255.0, 0.0, 0.0), 5)
+//        Imgproc.rectangle(aInputFrame, Point(100.0, 100.0), Point(200.0, 200.0), Scalar(255.0, 0.0, 0.0), 5)
         Log.i(TAG, "rotate finished")
         return aInputFrame
     }

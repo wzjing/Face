@@ -21,9 +21,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".CameraActivity" android:label="YUV_Data">
+        <activity android:name=".customcamera.CameraActivity" android:label="YUV_Data">
         </activity>
-        <activity android:name=".OpenCVCameraActivity" />
+        <activity android:name=".opencvcamera.OpenCVCameraActivity" />
     </application>
 
 </manifest>

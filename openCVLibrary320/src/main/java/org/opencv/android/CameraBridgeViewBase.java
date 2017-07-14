@@ -409,6 +409,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         if (bmpValid && mCacheBitmap != null) {
             Canvas canvas = getHolder().lockCanvas();
             if (canvas != null) {
+//                canvas.save();
+                canvas.rotate(90, canvas.getWidth()/2, canvas.getHeight()/2);
                 canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
                 if (BuildConfig.DEBUG)
                     Log.d(TAG, "mStretch value: " + mScale);
@@ -431,6 +433,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                     mFpsMeter.measure();
                     mFpsMeter.draw(canvas, 20, 30);
                 }
+//                canvas.restore();
                 getHolder().unlockCanvasAndPost(canvas);
             }
         }

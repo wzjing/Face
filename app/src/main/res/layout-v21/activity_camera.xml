@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.wzjing.face.MyGLSurfaceView
+    <com.wzjing.face.customcamera.MyGLSurfaceView
         android:id="@+id/cameraGSV"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

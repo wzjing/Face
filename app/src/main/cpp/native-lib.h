@@ -3,6 +3,8 @@
 
 #include <string>
 #include <jni.h>
+#include <iostream>
+#include <bitset>
 #include <android/log.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -16,7 +18,7 @@ JNIEXPORT jstring JNICALL
 Java_com_wzjing_face_MainActivity_stringFromJNI(JNIEnv *env, jobject /* this */);
 
 JNIEXPORT void JNICALL
-Java_com_wzjing_face_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree);
+Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree);
 };
 
 #endif //FACE_NATIVE_LIB_H

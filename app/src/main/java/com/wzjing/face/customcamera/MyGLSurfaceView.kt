@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.wzjing.face
+package com.wzjing.face.customcamera
 
 import android.content.Context
 import android.graphics.ImageFormat
@@ -11,7 +11,6 @@ import android.os.Environment
 import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
-import junit.framework.Assert
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream

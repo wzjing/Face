@@ -1,4 +1,4 @@
-package com.wzjing.face
+package com.wzjing.face.customcamera
 
 import android.opengl.GLSurfaceView
 import javax.microedition.khronos.egl.EGLConfig

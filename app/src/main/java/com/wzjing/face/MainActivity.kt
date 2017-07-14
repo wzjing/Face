@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import com.wzjing.face.customcamera.CameraActivity
+import com.wzjing.face.opencvcamera.OpenCVCameraActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
