@@ -130,20 +130,8 @@ include_directories( ${CMAKE_SOURCE_DIR}/src/libs/opencv/include )
 
 target_link_libraries( native-lib
                        ${log-lib}
-                       opencv_calib3d
                        opencv_core
-                       opencv_features2d
-                       opencv_flann
-                       opencv_highgui
                        opencv_imgcodecs
                        opencv_imgproc
                        opencv_java3
-                       opencv_ml
-                       opencv_objdetect
-                       opencv_photo
-                       opencv_shape
-                       opencv_stitching
-                       opencv_superres
-                       opencv_video
-                       opencv_videoio
-                       opencv_videostab)
+                       opencv_objdetect)

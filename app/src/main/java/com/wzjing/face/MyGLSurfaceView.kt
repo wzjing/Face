@@ -11,6 +11,7 @@ import android.os.Environment
 import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
+import junit.framework.Assert
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -42,24 +43,8 @@ class MyGLSurfaceView : GLSurfaceView {
     /* Callback2 override */
     override fun surfaceCreated(holder: SurfaceHolder?) {
         super.surfaceCreated(holder)
-        Log.d(TAG, "Surface created")
-        cam = Camera.open()
-        val params = cam.parameters
-        params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-        val size = getBestCameraResolution(params, 960)
-        params.setPreviewSize(size.width, size.height)
-        params.previewFormat = ImageFormat.YV12
-        params.previewFrameRate = 25
-        cam.parameters = params
-        cam.setPreviewDisplay(mHolder)
-
-        cam.setPreviewCallback { data, _ ->
-//            Log.d(TAG, "shooting:$shooting, data:${data.size}, currentFrame:$currentFrame");
-            if (shooting && data != null && currentFrame <= maxFrame)
-                writeBytes(data)
-        }
-        cam.setDisplayOrientation(90)
-        cam.startPreview()
+        Log.d(TAG, "Surface created, holder is ${holder == null}")
+        openCamera(holder)
 
     }
 
@@ -73,11 +58,7 @@ class MyGLSurfaceView : GLSurfaceView {
         super.surfaceDestroyed(holder)
         Log.d(TAG, "Surface destroyed")
         shooting = false
-        cam.run {
-            setPreviewCallback(null)
-            stopPreview()
-            release()
-        }
+        releaseCamera()
 
     }
 
@@ -129,6 +110,39 @@ class MyGLSurfaceView : GLSurfaceView {
         fis.close()
         stopShoot()
     })
+
+
+    private fun openCamera(holder: SurfaceHolder?) {
+        cam = Camera.open()
+        val params = cam.parameters
+        params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+        val size = getBestCameraResolution(params, 960)
+        params.setPreviewSize(size.width, size.height)
+        params.previewFormat = ImageFormat.YV12
+        params.previewFrameRate = 25
+        cam.parameters = params
+//        assert(holder == null) {
+//            Log.i(TAG, "Null")
+//            return
+//        }
+        cam.setPreviewDisplay(holder)
+
+        cam.setPreviewCallback { data, _ ->
+            //            Log.d(TAG, "shooting:$shooting, data:${data.size}, currentFrame:$currentFrame");
+            if (shooting && data != null && currentFrame <= maxFrame)
+                writeBytes(data)
+        }
+        cam.setDisplayOrientation(90)
+        cam.startPreview()
+    }
+
+    private fun releaseCamera() {
+        Log.i(TAG, "Release camera")
+        cam.stopPreview()
+        cam.setPreviewDisplay(null)
+        cam.setPreviewCallback(null)
+        cam.release()
+    }
 
 
     /**
