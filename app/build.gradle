@@ -29,7 +29,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11 -frtti -fexceptions -D__STDC_FORMAT_MACROS -lz"
+                cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS -lz"
                 abiFilters "armeabi-v7a", "x86"
             }
         }
@@ -58,6 +58,7 @@ android {
             externalNativeBuild {
                 cmake {
                     abiFilters "armeabi-v7a"
+                    cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS -lz -mfloat-abi=softfp -mfpu=neon"
                 }
             }
             dimension "abi"

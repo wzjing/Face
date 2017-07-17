@@ -22,10 +22,6 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
 
     private val mLoaderCallback = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
-//            when (status) {
-//                LoaderCallbackInterface.SUCCESS -> initializeOpenCVDependencies()
-//                else -> super.onManagerConnected(status)
-//            }
 
             super.onManagerConnected(status)
             openCvCameraView!!.enableView()
@@ -120,24 +116,6 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
         init {
             System.loadLibrary("opencv_java3")
             System.loadLibrary("native-lib")
-//            System.loadLibrary("opencv_calib3d")
-//            System.loadLibrary("opencv_core")
-//            System.loadLibrary("opencv_features2d")
-//            System.loadLibrary("opencv_flann")
-//            System.loadLibrary("opencv_highgui")
-//            System.loadLibrary("opencv_imgcodecs")
-//            System.loadLibrary("opencv_ml")
-//            System.loadLibrary("opencv_objdetect")
-//            System.loadLibrary("opencv_photo")
-//            System.loadLibrary("opencv_shape")
-//            System.loadLibrary("opencv_stitching")
-//            System.loadLibrary("opencv_superres")
-//            System.loadLibrary("opencv_video")
-//            System.loadLibrary("opencv_videoio")
-//            System.loadLibrary("opencv_videostab")
-//            if(OpenCVLoader.initDebug()) {
-//                System.err.print("unable to init OpenCVLib")
-//            }
         }
     }
 }
