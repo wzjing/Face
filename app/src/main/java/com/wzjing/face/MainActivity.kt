@@ -34,6 +34,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) !=
                 PackageManager.PERMISSION_GRANTED)
             requestPermissions.add(Manifest.permission.CAMERA)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) !=
+                PackageManager.PERMISSION_GRANTED)
+            requestPermissions.add(Manifest.permission.RECORD_AUDIO)
 
         if (!requestPermissions.isEmpty())
             ActivityCompat.requestPermissions(this,

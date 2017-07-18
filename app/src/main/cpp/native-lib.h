@@ -16,6 +16,10 @@
 #define LOGI(TAG, format, ...) __android_log_print(ANDROID_LOG_INFO, TAG, format, ## __VA_ARGS__)
 
 using namespace cv;
+using namespace std;
+
+CascadeClassifier classifier;
+bool loaded = false;
 
 extern "C" {
 JNIEXPORT void JNICALL

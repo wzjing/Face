@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
+import android.util.TypedValue;
 
 public class FpsMeter {
     private static final String TAG               = "FpsMeter";
@@ -22,6 +23,7 @@ public class FpsMeter {
     boolean                     mIsInitialized = false;
     int                         mWidth = 0;
     int                         mHeight = 0;
+    private float textSize = 30f;
 
     public void init() {
         mFramesCouner = 0;
@@ -30,8 +32,15 @@ public class FpsMeter {
         mStrfps = "";
 
         mPaint = new Paint();
-        mPaint.setColor(Color.BLUE);
-        mPaint.setTextSize(20);
+        mPaint.setColor(Color.parseColor("#FFD700"));
+        mPaint.setTextSize(textSize);
+    }
+
+    public void setTextSize(float size) {
+        if (mPaint != null)
+            mPaint.setTextSize(size);
+        else
+            textSize = size;
     }
 
     public void measure() {

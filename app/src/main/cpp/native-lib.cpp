@@ -1,72 +1,75 @@
 #include "native-lib.h"
 
-JNIEXPORT void JNICALL
-Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree) {
+long start = 0;
 
-    Mat* src = (Mat *) frame;
-    CascadeClassifier classifier;
-    classifier.load("/storage/emulated/0/classifier.xml");
+JNIEXPORT void JNICALL
+Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */,
+                                                                   jlong frame, jfloat degree) {
+
+    start = clock();
+    LOGI(ATAG, "Frame Start:---------------------------------------------");
+    Mat *src = (Mat *) frame;
+    if (!loaded) {
+        loaded = classifier.load("/storage/emulated/0/classifier.xml");
+        LOGI(ATAG, "Load: %.2f", (clock() - start) / 1000.0);
+    }
     transpose(*src, *src);
     flip(*src, *src, 1);
-    detectAndDraw(*src, classifier, true);
+    LOGI(ATAG, "Pre rotated: %.2f", (clock() - start) / 1000.0);
+    detectAndDraw(*src, classifier, false);
     transpose(*src, *src);
     flip(*src, *src, 0);
+    LOGI(ATAG, "End: %.2f", (clock() - start) / 1000.0);
 }
 
-void detectAndDraw( Mat& frame, CascadeClassifier& cascade, bool tryflip )
-{
-    double t = 0;
-    std::vector<Rect> faces, faces2;
+void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
+    LOGI(ATAG, "Detection Start: %.2f", (clock() - start) / 1000.0);
+    double time = 0;
+    vector<Rect> faces, faces2;
     const static Scalar colors[] =
             {
-                    Scalar(255,0,0),
-                    Scalar(255,128,0),
-                    Scalar(255,255,0),
-                    Scalar(0,255,0),
-                    Scalar(0,128,255),
-                    Scalar(0,255,255),
-                    Scalar(0,0,255),
-                    Scalar(255,0,255)
+                    Scalar(255, 0, 0),
+                    Scalar(255, 128, 0),
+                    Scalar(255, 255, 0),
+                    Scalar(0, 255, 0),
+                    Scalar(0, 128, 255),
+                    Scalar(0, 255, 255),
+                    Scalar(0, 0, 255),
+                    Scalar(255, 0, 255)
             };
-    Mat gray, smallImg;
+    Mat gray, small_gray;
 
-    cvtColor( frame, gray, COLOR_BGR2GRAY );
-    double fx = 1.0;
-    resize( gray, smallImg, Size(), fx, fx, INTER_LINEAR );
-    equalizeHist( smallImg, smallImg );
+    cvtColor(frame, gray, COLOR_BGR2GRAY);
+    LOGI(ATAG, "Detection Pre-gray: %.2f", (clock() - start) / 1000.0);
 
-    t = (double)getTickCount();
-    cascade.detectMultiScale( smallImg, faces,
-                              1.1, 3, 0
-                                      //|CASCADE_FIND_BIGGEST_OBJECT
-                                      //|CASCADE_DO_ROUGH_SEARCH
-                                      |CASCADE_SCALE_IMAGE,
-                              Size(100, 100) );
-    if( tryflip )
-    {
-        flip(smallImg, smallImg, 1);
-        cascade.detectMultiScale( smallImg, faces2,
-                                  1.1, 2, 0
-                                          //|CASCADE_FIND_BIGGEST_OBJECT
-                                          //|CASCADE_DO_ROUGH_SEARCH
-                                          |CASCADE_SCALE_IMAGE,
-                                  Size(30, 30) );
-        for( std::vector<Rect>::const_iterator r = faces2.begin(); r != faces2.end(); ++r )
-        {
-            faces.push_back(Rect(smallImg.cols - r->x - r->width, r->y, r->width, r->height));
-        }
+    double fx = 0.3;
+    resize(gray, small_gray, Size(), fx, fx, INTER_LINEAR);
+    LOGI(ATAG, "Detection Pre-resize: %.2f", (clock() - start) / 1000.0);
+    equalizeHist(small_gray, small_gray);
+    LOGI(ATAG, "Detection Pre-equal: %.2f", (clock() - start) / 1000.0);
+
+    LOGI(ATAG, "Detection Main: %.2f", (clock() - start) / 1000.0);
+    time = (double) getTickCount();
+    cascade.detectMultiScale(small_gray,
+                             faces,
+                             1.1,
+                             3,
+                             0 |
+                             CASCADE_SCALE_IMAGE,//|CASCADE_FIND_BIGGEST_OBJECT|CASCADE_DO_ROUGH_SEARCH
+                             Size(50, 50));
+
+    time = (double) getTickCount() - time;
+    LOGI(ATAG, "detection time = %g ms\n", time * 1000 / getTickFrequency());
+
+    LOGI(ATAG, "Detection Draw: %.2f", (clock() - start) / 1000.0);
+    for (size_t i = 0; i < faces.size(); i++) {
+        Scalar color = colors[i % 8];
+
+        int tx = (int) (faces[i].x / fx);
+        int ty = (int) (faces[i].y / fx);
+        int w = (int) (faces[i].width / fx);
+        int h = (int) (faces[i].height / fx);
+        rectangle(frame, Rect(tx, ty, w, h), color, 3, 8, 0);
     }
-    t = (double)getTickCount() - t;
-    LOGI( ATAG, "detection time = %g ms\n", t*1000/getTickFrequency());
-    for ( size_t i = 0; i < faces.size(); i++ )
-    {
-        Rect r = faces[i];
-        Mat smallImgROI;
-        std::vector<Rect> nestedObjects;
-        Scalar color = colors[i%8];
-
-        rectangle(frame, cvPoint(cvRound(r.x), cvRound(r.y)),
-                  cvPoint(cvRound((r.x + r.width - 1)), cvRound((r.y + r.height - 1))),
-                  color, 4, 8, 0);
-    }
+    LOGI(ATAG, "Detection End: %.2f", (clock() - start) / 1000.0);
 }
