@@ -3,27 +3,25 @@
 long start = 0;
 
 JNIEXPORT void JNICALL
-Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */,
-                                                                   jlong frame, jfloat degree) {
+Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_detectFaces(JNIEnv *env, jobject /* this */,
+                                                                   jlong frame) {
 
     start = clock();
     LOGI(ATAG, "Frame Start:---------------------------------------------");
     Mat *src = (Mat *) frame;
     if (!loaded) {
         loaded = classifier.load("/storage/emulated/0/classifier.xml");
-        LOGI(ATAG, "Load: %.2f", (clock() - start) / 1000.0);
+        LOGI(ATAG, "Load: %.2f ms", (clock() - start) / 1000.0);
     }
-    transpose(*src, *src);
-    flip(*src, *src, 1);
-    LOGI(ATAG, "Pre rotated: %.2f", (clock() - start) / 1000.0);
+    rotate(*src, *src, ROTATE_90_COUNTERCLOCKWISE);
+    LOGI(ATAG, "Pre rotated: %.2f ms", (clock() - start) / 1000.0);
     detectAndDraw(*src, classifier, false);
-    transpose(*src, *src);
-    flip(*src, *src, 0);
-    LOGI(ATAG, "End: %.2f", (clock() - start) / 1000.0);
+    rotate(*src, *src, ROTATE_90_COUNTERCLOCKWISE);
+    LOGI(ATAG, "End: %.2f ms", (clock() - start) / 1000.0);
 }
 
 void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
-    LOGI(ATAG, "Detection Start: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection Start: %.2f ms", (clock() - start) / 1000.0);
     double time = 0;
     vector<Rect> faces, faces2;
     const static Scalar colors[] =
@@ -40,28 +38,29 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
     Mat gray, small_gray;
 
     cvtColor(frame, gray, COLOR_BGR2GRAY);
-    LOGI(ATAG, "Detection Pre-gray: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection Pre-gray: %.2f ms", (clock() - start) / 1000.0);
 
-    double fx = 0.3;
+    double fx = 180.0/frame.cols;
+    int minSize = (int) (180*fx);
     resize(gray, small_gray, Size(), fx, fx, INTER_LINEAR);
-    LOGI(ATAG, "Detection Pre-resize: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection Pre-resize: %.2f ms", (clock() - start) / 1000.0);
     equalizeHist(small_gray, small_gray);
-    LOGI(ATAG, "Detection Pre-equal: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection Pre-equal: %.2f ms", (clock() - start) / 1000.0);
 
-    LOGI(ATAG, "Detection Main: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection Processing: %.2f ms", (clock() - start) / 1000.0);
     time = (double) getTickCount();
     cascade.detectMultiScale(small_gray,
                              faces,
-                             1.1,
+                             1.5,
                              3,
-                             0 |
-                             CASCADE_SCALE_IMAGE,//|CASCADE_FIND_BIGGEST_OBJECT|CASCADE_DO_ROUGH_SEARCH
-                             Size(50, 50));
+                             0|CASCADE_SCALE_IMAGE,//|CASCADE_FIND_BIGGEST_OBJECT|CASCADE_DO_ROUGH_SEARCH
+                             Size(minSize, minSize),
+                             Size((int) (small_gray.cols * 0.6), (int) (small_gray.rows * 0.6)));
 
     time = (double) getTickCount() - time;
     LOGI(ATAG, "detection time = %g ms\n", time * 1000 / getTickFrequency());
 
-    LOGI(ATAG, "Detection Draw: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection Draw: %.2f ms", (clock() - start) / 1000.0);
     for (size_t i = 0; i < faces.size(); i++) {
         Scalar color = colors[i % 8];
 
@@ -71,5 +70,5 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
         int h = (int) (faces[i].height / fx);
         rectangle(frame, Rect(tx, ty, w, h), color, 3, 8, 0);
     }
-    LOGI(ATAG, "Detection End: %.2f", (clock() - start) / 1000.0);
+    LOGI(ATAG, "Detection End: %.2f ms", (clock() - start) / 1000.0);
 }

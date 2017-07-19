@@ -23,7 +23,7 @@ bool loaded = false;
 
 extern "C" {
 JNIEXPORT void JNICALL
-Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_rotateFrame(JNIEnv *env, jobject /* this */, jlong frame, jfloat degree);
+Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_detectFaces(JNIEnv *env, jobject /* this */, jlong frame);
 };
 void detectAndDraw( Mat& frame, CascadeClassifier& cascade, bool tryflip );
 

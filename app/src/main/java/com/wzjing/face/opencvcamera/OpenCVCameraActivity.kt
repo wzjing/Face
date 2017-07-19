@@ -30,8 +30,9 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         super.onCreate(savedInstanceState)
 
-        openCvCameraView = JavaCameraView(this, -1)
+        openCvCameraView = JavaCameraView(this, JavaCameraView.CAMERA_ID_FRONT)
         setContentView(openCvCameraView)
+        openCvCameraView!!.setMaxFrameSize(1280, 720)
         openCvCameraView!!.setCvCameraViewListener(this)
     }
 
@@ -41,7 +42,7 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
 
     override fun onCameraFrame(aInputFrame: Mat): Mat {
 
-        rotateFrame(aInputFrame.nativeObj, -90)
+        detectFaces(aInputFrame.nativeObj)
         return aInputFrame
     }
 
@@ -50,7 +51,7 @@ class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListen
         mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS)
     }
 
-    external fun rotateFrame(frame: Long, degree: Int)
+    external fun detectFaces(frame: Long)
 
     companion object {
 
