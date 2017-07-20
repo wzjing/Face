@@ -7,9 +7,11 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
+import android.media.ImageReader
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Size
+import android.view.View
 import android.widget.Toast
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -19,7 +21,8 @@ class OriginCameraActivity : AppCompatActivity() {
 
     private lateinit var mCameraID: String
     private var mCameraDevice: CameraDevice? = null
-    private lateinit var mCaptureSession: CameraCaptureSession
+    private var mCaptureSession: CameraCaptureSession? = null
+    private var mImageReader: ImageReader? = null
     private lateinit var mPreviewSize: Size
 
     private var mCameraLock = Semaphore(1)
@@ -27,12 +30,18 @@ class OriginCameraActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        initCamera()
+        openCamera()
+
+    }
+
+    override fun onPause() {
+        closeCamera()
+        super.onPause()
 
     }
 
     @SuppressLint("MissingPermission")
-    private fun initCamera() {
+    private fun openCamera() {
         val cameraManager = applicationContext.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         mCameraID = cameraManager.cameraIdList.get(0)
         try {
@@ -46,9 +55,39 @@ class OriginCameraActivity : AppCompatActivity() {
         }
     }
 
+    private fun closeCamera() {
+        try {
+            mCameraLock.acquire()
+            if (mCaptureSession != null) {
+                mCaptureSession?.close()
+                mCaptureSession = null
+            }
+            if (mCameraDevice != null) {
+                mCameraDevice?.close()
+                mCameraDevice = null
+            }
+            if (mImageReader != null) {
+                mImageReader?.close()
+                mImageReader = null
+            }
+        } catch (e: InterruptedException) {
+            throw RuntimeException("Interrupted while trying to lock camera on close")
+        } finally {
+            mCameraLock.release()
+        }
+    }
+
+    private fun startBackgroundThread() {
+        TODO("Start the background handle thread")
+    }
+
+    private fun stopBackgroundThread() {
+        TODO("Stop the background handle thread")
+    }
+
     private fun createPreiewSession() {
         try {
-
+            TODO("Configure the camera preview and origin data")
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
