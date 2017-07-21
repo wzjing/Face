@@ -12,12 +12,15 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.util.Range
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import android.view.ViewGroup
+import android.widget.RelativeLayout
 import android.widget.Toast
+import org.opencv.core.Core
+import org.opencv.core.CvType
+import org.opencv.imgproc.Imgproc
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -33,6 +36,7 @@ class OriginCameraActivity : AppCompatActivity() {
     private val STATE_PICTURE_TAKEN = 4
     private var mState = 0
 
+    private var mCVView: CVView? = null
     private var mPreviewTexture: TextureView? = null
     private lateinit var mCameraID: String
     private var mCameraDevice: CameraDevice? = null
@@ -47,9 +51,19 @@ class OriginCameraActivity : AppCompatActivity() {
     /* Life Cycle */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val layout = RelativeLayout(this)
         mPreviewTexture = TextureView(this)
-        val params = ViewGroup.LayoutParams(720, 1280)
-        setContentView(mPreviewTexture, params)
+        mCVView = CVView(this)
+        val params1 = RelativeLayout.LayoutParams(720, 1280)
+        params1.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE)
+        params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
+        val params2 = RelativeLayout.LayoutParams(720, 1280)
+        params2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
+        params2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE)
+
+        layout.addView(mPreviewTexture, params1)
+        layout.addView(mCVView, params2)
+        setContentView(layout, ViewGroup.LayoutParams(-1, -1))
     }
 
     override fun onResume() {
@@ -189,6 +203,9 @@ class OriginCameraActivity : AppCompatActivity() {
         val v_data = ByteArray(v_buffer.remaining())
         v_buffer.get(v_data)
 
+        val mat = Mat(1280, 720, CvType.CV_8UC1)
+        mat.put(1280, 720, y_data.plus(v_data))
+        mCVView?.addFrame(mat)
 
 
 //        val u_str = StringBuilder()
@@ -297,6 +314,14 @@ class OriginCameraActivity : AppCompatActivity() {
             finish()
         }
 
+    }
+
+    companion object {
+
+        init {
+            System.loadLibrary("opencv_java3")
+            System.loadLibrary("native-lib")
+        }
     }
 
 }

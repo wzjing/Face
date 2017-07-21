@@ -1,16 +1,13 @@
 package com.wzjing.face.opencvcamera
 
 import android.app.Activity
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.WindowManager
-import com.wzjing.face.R
-import org.opencv.android.*
-import org.opencv.core.*
-import org.opencv.objdetect.CascadeClassifier
-import java.io.File
-import java.io.FileOutputStream
+import org.opencv.android.BaseLoaderCallback
+import org.opencv.android.CameraBridgeViewBase
+import org.opencv.android.JavaCameraView
+import org.opencv.android.LoaderCallbackInterface
+import org.opencv.core.Mat
 
 class OpenCVCameraActivity : Activity(), CameraBridgeViewBase.CvCameraViewListener {
 

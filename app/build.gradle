@@ -72,6 +72,10 @@ android {
             path "CMakeLists.txt"
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
@@ -84,4 +88,10 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     implementation 'com.android.support:appcompat-v7:25.4.0'
+    implementation "org.jetbrains.anko:anko-common:$anko_version"
+}
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
 }
