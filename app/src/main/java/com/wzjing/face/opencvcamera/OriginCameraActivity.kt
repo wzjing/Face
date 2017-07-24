@@ -57,7 +57,7 @@ class OriginCameraActivity : AppCompatActivity() {
         val params1 = RelativeLayout.LayoutParams(720, 1280)
         params1.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE)
         params1.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE)
-        val params2 = RelativeLayout.LayoutParams(720, 1280)
+        val params2 = RelativeLayout.LayoutParams(640, 360)
         params2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE)
         params2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE)
 
@@ -191,21 +191,23 @@ class OriginCameraActivity : AppCompatActivity() {
         val y_buffer = image!!.planes[0].buffer
         val y_data = ByteArray(y_buffer.remaining())
         y_buffer.get(y_data)
-        Log.i(TAG, "Got byte: ${!y_data.isEmpty()}, size ${y_data.size}")
+        Log.i(TAG, "Y byte: ${!y_data.isEmpty()}, size ${y_data.size}")
 
         //U data(Actully, it is uvuvuvuv), half size of y_buffer
         val u_buffer = image.planes[1].buffer
         val u_data = ByteArray(u_buffer.remaining())
         u_buffer.get(u_data)
+        Log.i(TAG, "U byte: ${!u_data.isEmpty()}, size ${u_data.size}")
 
         //V data(Actully, it is vuvuvuvu), half size of y_buffer
         val v_buffer = image.planes[2].buffer
         val v_data = ByteArray(v_buffer.remaining())
         v_buffer.get(v_data)
+        Log.i(TAG, "V byte: ${!v_data.isEmpty()}, size ${v_data.size}")
 
-        val mat = Mat(1280, 720, CvType.CV_8UC1)
-        mat.put(1280, 720, y_data.plus(v_data))
-        mCVView?.addFrame(mat)
+        val uv_data = v_data.plus(u_data[u_data.size-1])
+        Log.i(TAG, "V byte: ${!uv_data.isEmpty()}, size ${uv_data.size}")
+        mCVView?.addFrame(1280, 720, y_data.plus(uv_data))
 
 
 //        val u_str = StringBuilder()
