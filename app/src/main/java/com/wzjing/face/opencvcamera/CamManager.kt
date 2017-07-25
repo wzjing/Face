@@ -1,23 +1,23 @@
 package com.wzjing.face.opencvcamera
 
 import android.content.Context
+import android.net.Uri
+import android.os.Build
 
-abstract class CamManager {
-
-    public var mPreviewListener: OnPreviewListener? = null
-    protected var mSize: Size
-    protected var mContext: Context
-
-    constructor(context: Context) {
-        mContext = context
-        mSize = Size(1280, 720)
-    }
-    constructor(context: Context, size: Size): this(context) {
-        mSize = size
-    }
+abstract class CamManager (var context: Context, var size: Size = Size(1280, 720)){
 
     /**
-     * Open camera devide
+     * mPreviewListener oprate the origin Bytearray of frame
+     * default format is YUV_8888
+     * @see android.graphics.ImageFormat
+     * @param   Int   frame width
+     * @param   Int   frame height
+     * @param   ByteArray    frame ByteArray data
+     */
+    public var previewListener: ((Int, Int, ByteArray)->Unit)? = null
+
+    /**
+     * Open camera device
      */
     public abstract fun openCamera()
 
@@ -37,24 +37,24 @@ abstract class CamManager {
     public abstract fun stopRecord()
 
     /**
-     * Set the preview and record video frame size
+     * Take a picture
+     * @param   after   excute after() when finish take picture
      */
-    public fun setFrameSize(size: Size) {
-        mSize = size
-    }
-
-    /**
-     * PreviewListener interface to handle the ByteArray frame data
-     */
-    public interface OnPreviewListener {
-        /**
-         *
-         */
-        fun onPreview(w: Int, h: Int, data: ByteArray): Unit
-    }
+    public abstract fun takePicture(after: (Uri)->Unit)
 
     /**
      * data class Size, storage width and height
      */
     public data class Size(val width: Int, val height: Int)
+
+    public companion object {
+        public class Builder(var context: Context, val size: Size? = null) {
+            public fun build(): CamManager {
+                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP)
+                    if (size != null) return CameraNew(context, size) else return CameraNew(context)
+                else
+                    if (size != null) return CameraOld(context, size) else return CameraOld(context)
+            }
+        }
+    }
 }

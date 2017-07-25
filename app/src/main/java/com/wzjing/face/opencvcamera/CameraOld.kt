@@ -1,8 +1,10 @@
 package com.wzjing.face.opencvcamera
 
+import android.app.Notification
 import android.content.Context
 import android.hardware.Camera
 import android.hardware.camera2.CameraManager
+import android.net.Uri
 
 @Suppress("DEPRECATION")
 class CameraOld : CamManager {
@@ -22,9 +24,9 @@ class CameraOld : CamManager {
         }
         camera?.parameters = params
         camera?.startPreview()
-        if (mPreviewListener != null) {
+        if (previewListener != null) {
             camera?.setPreviewCallback { data, camera ->
-                mPreviewListener?.onPreview(mSize.width, mSize.height, data)
+                previewListener?.invoke(mSize.width, mSize.height, data)
             }
         }
     }
@@ -41,6 +43,10 @@ class CameraOld : CamManager {
     }
 
     override fun stopRecord() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun takePicture(after: (Uri) -> Unit) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
