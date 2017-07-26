@@ -24,7 +24,9 @@ abstract class CamManager (var context: Context, var size: Size = Size(1280, 720
     /**
      * Close camera device
      */
-    public abstract fun closeCamera()
+    public open fun closeCamera() {
+        previewListener = null
+    }
 
     /**
      * Start recording video

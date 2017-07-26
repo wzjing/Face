@@ -18,7 +18,7 @@ class CameraOld : CamManager {
     override fun openCamera() {
         camera = Camera.open()
         val params = camera?.parameters
-        params?.setPreviewSize(mSize.width, mSize.height)
+        params?.setPreviewSize(size.width, size.height)
         if (params?.supportedFocusModes?.contains(Camera.Parameters.FOCUS_MODE_AUTO) ?: false) {
             params?.focusMode = Camera.Parameters.FOCUS_MODE_AUTO
         }
@@ -26,12 +26,13 @@ class CameraOld : CamManager {
         camera?.startPreview()
         if (previewListener != null) {
             camera?.setPreviewCallback { data, camera ->
-                previewListener?.invoke(mSize.width, mSize.height, data)
+                previewListener?.invoke(size.width, size.height, data)
             }
         }
     }
 
     override fun closeCamera() {
+        super.closeCamera()
         camera?.stopPreview()
         camera?.setPreviewCallback(null)
         camera?.release()
