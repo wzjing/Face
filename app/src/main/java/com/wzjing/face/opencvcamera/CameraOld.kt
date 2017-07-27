@@ -1,9 +1,7 @@
 package com.wzjing.face.opencvcamera
 
-import android.app.Notification
 import android.content.Context
 import android.hardware.Camera
-import android.hardware.camera2.CameraManager
 import android.net.Uri
 
 @Suppress("DEPRECATION")

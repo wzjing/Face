@@ -29,7 +29,8 @@
         <activity
             android:name=".opencvcamera.OpenCVCameraActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".opencvcamera.OriginCameraActivity"></activity>
+        <activity android:name=".opencvcamera.OriginCameraActivity" />
+        <activity android:name=".opencvcamera.CameraActivity"></activity>
     </application>
 
 </manifest>

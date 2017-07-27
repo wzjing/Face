@@ -16,12 +16,8 @@ import android.util.Size
 import android.view.Surface
 import android.view.TextureView
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.RelativeLayout
 import android.widget.Toast
-import org.opencv.core.Core
-import org.opencv.core.CvType
-import org.opencv.imgproc.Imgproc
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 
@@ -206,7 +202,7 @@ class OriginCameraActivity : AppCompatActivity() {
         v_buffer.get(v_data)
         Log.i(TAG, "V byte: ${!v_data.isEmpty()}, size ${v_data.size}")
 
-        val uv_data = v_data.plus(u_data[u_data.size-1])
+        val uv_data = v_data.plus(u_data[u_data.size - 1])
         Log.i(TAG, "V byte: ${!uv_data.isEmpty()}, size ${uv_data.size}")
         mCVView?.addFrame(1280, 720, y_data.plus(uv_data))
 
@@ -226,7 +222,7 @@ class OriginCameraActivity : AppCompatActivity() {
         image.close()
     }
 
-    private val mSurfaceTextureListener = object: TextureView.SurfaceTextureListener {
+    private val mSurfaceTextureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
 
         }
@@ -269,7 +265,7 @@ class OriginCameraActivity : AppCompatActivity() {
                     val aeState = result?.get(CaptureResult.CONTROL_AE_STATE)
                     if (aeState == null ||
                             aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
-                            aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED)  {
+                            aeState == CaptureResult.CONTROL_AE_STATE_FLASH_REQUIRED) {
                         mState = STATE_WAITING_NON_PRECAPTURE
                     }
                 }

@@ -61,4 +61,11 @@ class CameraView(context: Context, var attrs: AttributeSet? = null) : SurfaceVie
         camManager.closeCamera()
     }
 
+    companion object {
+        init {
+            System.loadLibrary("opencv_java3")
+            System.loadLibrary("native-lib")
+        }
+    }
+
 }
