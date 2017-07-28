@@ -8,7 +8,6 @@ import android.hardware.camera2.*
 import android.media.ImageReader
 import android.net.Uri
 import android.util.Log
-import android.view.TextureView
 import android.widget.Toast
 
 @TargetApi(21)
@@ -49,7 +48,10 @@ class CameraNew : CamManager{
 
     override fun closeCamera() {
         super.closeCamera()
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        mCaptureSession?.close()
+        mCameraDevice?.close()
+        mImageReader?.close()
+
     }
 
     override fun startRecord() {
@@ -109,7 +111,7 @@ class CameraNew : CamManager{
             mCaptureSession = session
             mPreviewRequestBuilder!!.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO)
             mPreviewRequest = mPreviewRequestBuilder!!.build()
-            mCaptureSession!!.setRepeatingRequest(mPreviewRequest, captureSessionCaptureCallback, null)
+            mCaptureSession!!.setRepeatingRequest(mPreviewRequest, null, null)
         }
 
     }
@@ -132,28 +134,26 @@ class CameraNew : CamManager{
         }
     }
 
-    private val mOnImageAvailableListener = object : ImageReader.OnImageAvailableListener{
-        override fun onImageAvailable(reader: ImageReader?) {
-            val image = reader?.acquireNextImage()
+    private val mOnImageAvailableListener = ImageReader.OnImageAvailableListener { reader ->
+        val image = reader?.acquireNextImage()
 
-            //Y data, (frame.width x frame.height)
-            val y_buffer = image!!.planes[0].buffer
-            val y_data = ByteArray(y_buffer.remaining())
-            y_buffer.get(y_data)
+        //Y data, (frame.width x frame.height)
+        val y_buffer = image!!.planes[0].buffer
+        val y_data = ByteArray(y_buffer.remaining())
+        y_buffer.get(y_data)
 
-            //UV data, (y_data.size/2 -1) : uvuvuv...uvu
-            val uv_buffer = image.planes[1].buffer
-            val uv_data = ByteArray(uv_buffer.remaining())
-            uv_buffer.get(uv_data)
+        //UV data, (y_data.size/2 -1) : uvuvuv...uvu
+        val uv_buffer = image.planes[1].buffer
+        val uv_data = ByteArray(uv_buffer.remaining())
+        uv_buffer.get(uv_data)
 
-            //VU data, (y_data.size/2-1) : vuvuvu...vuv
-            val vu_buffer = image.planes[2].buffer
-            val vu_data = ByteArray(vu_buffer.remaining())
-            vu_buffer.get(vu_data)
+        //VU data, (y_data.size/2-1) : vuvuvu...vuv
+        val vu_buffer = image.planes[2].buffer
+        val vu_data = ByteArray(vu_buffer.remaining())
+        vu_buffer.get(vu_data)
 
-            //Send NV21 format ByteArray
-            previewListener?.invoke(size.width, size.height, y_data.plus(vu_data).plus(vu_data[vu_data.size - 1]))
-        }
-
+        //Send NV21 format ByteArray
+        previewListener?.invoke(size.width, size.height, y_data.plus(vu_data.plus(uv_data[uv_data.size - 1])))
+        image.close()
     }
 }

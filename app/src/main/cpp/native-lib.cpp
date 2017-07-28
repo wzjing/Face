@@ -2,21 +2,29 @@
 
 long start = 0;
 
+JNIEXPORT jobject JNICALL
+Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint w,
+                                                           jint h, jbyteArray data_) {
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+
+    // TODO
+
+    env->ReleaseByteArrayElements(data_, data, 0);
+}
+
 JNIEXPORT void JNICALL
-Java_com_wzjing_face_opencvcamera_OpenCVCameraActivity_detectFaces(JNIEnv *env, jobject /* this */,
-                                                                   jlong frame) {
+void detectFace(Mat *frame) {
 
     start = clock();
     LOGI(ATAG, "Frame Start:---------------------------------------------");
-    Mat *src = (Mat *) frame;
     if (!loaded) {
         loaded = classifier.load("/storage/emulated/0/classifier.xml");
         LOGI(ATAG, "Load: %.2f ms", (clock() - start) / 1000.0);
     }
-    rotate(*src, *src, ROTATE_90_COUNTERCLOCKWISE);
+    rotate(*frame, *frame, ROTATE_90_COUNTERCLOCKWISE);
     LOGI(ATAG, "Pre rotated: %.2f ms", (clock() - start) / 1000.0);
-    detectAndDraw(*src, classifier, false);
-    rotate(*src, *src, ROTATE_90_COUNTERCLOCKWISE);
+    detectAndDraw(*frame, classifier, false);
+    rotate(*frame, *frame, ROTATE_90_COUNTERCLOCKWISE);
     LOGI(ATAG, "End: %.2f ms", (clock() - start) / 1000.0);
 }
 

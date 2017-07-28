@@ -9,29 +9,24 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import org.jetbrains.anko.doAsyncResult
-import org.opencv.core.CvType
-import org.opencv.imgproc.Imgproc
 
-class CameraView(context: Context, var attrs: AttributeSet? = null) : SurfaceView(context, attrs), SurfaceHolder.Callback {
+class CameraView : SurfaceView, SurfaceHolder.Callback {
     private val TAG = "CameraView"
 
     private var camManager: CamManager = CamManager.Companion.Builder(context).build()
-    public var frameListener: ((Mat) -> Mat)? = null
     private var mCacheBitmap: Bitmap? = null
 
     private val paint: Paint = Paint()
 
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+
 
     init {
-        mCacheBitmap = Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.RGB_565)
+        mCacheBitmap = Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.ARGB_8888)
         camManager.previewListener = { w, h, data ->
             val bitmap = doAsyncResult {
-                var mat = Mat(w, h, CvType.CV_8UC1)
-                mat.put(w, h, data)
-                mat = frameListener?.invoke(mat) ?: mat
-                Imgproc.cvtColor(mat, mat, Imgproc.COLOR_YUV2BGR_NV21, 4)
-                Utils.matToBitmap(mat, mCacheBitmap)
-                mCacheBitmap
+                nativeProcess(w, h, data)
             }
 
             drawFrame(bitmap.get())
@@ -61,11 +56,6 @@ class CameraView(context: Context, var attrs: AttributeSet? = null) : SurfaceVie
         camManager.closeCamera()
     }
 
-    companion object {
-        init {
-            System.loadLibrary("opencv_java3")
-            System.loadLibrary("native-lib")
-        }
-    }
+    private external fun nativeProcess(w: Int, h: Int, data: ByteArray): Bitmap
 
 }
