@@ -2,34 +2,37 @@
 
 long start = 0;
 
-JNIEXPORT jobject JNICALL
-Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint w,
-                                                           jint h, jbyteArray data_) {
-    jbyte *data = env->GetByteArrayElements(data_, NULL);
+JNIEXPORT jintArray
+JNICALL
+Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
+                                                           jint col, int count, jbyteArray data_) {
+    double* values = (double*)env->GetPrimitiveArrayCritical(data_, 0);
 
-    // TODO
+    auto frame = Mat((int) (w * 1.5), h, CV_16UC3);
 
-    env->ReleaseByteArrayElements(data_, data, 0);
+    env->ReleasePrimitiveArrayCritical(data_, values, 0);
 }
 
-JNIEXPORT void JNICALL
-void detectFace(Mat *frame) {
+void put(Mat* frame, int row, int col, int count, double* values) {
 
+}
+
+void detectFace(Mat *frame) {
     start = clock();
-    LOGI(ATAG, "Frame Start:---------------------------------------------");
+    LOGI(TAG, "Frame Start:---------------------------------------------");
     if (!loaded) {
         loaded = classifier.load("/storage/emulated/0/classifier.xml");
-        LOGI(ATAG, "Load: %.2f ms", (clock() - start) / 1000.0);
+        LOGI(TAG, "Load: %.2f ms", (clock() - start) / 1000.0);
     }
     rotate(*frame, *frame, ROTATE_90_COUNTERCLOCKWISE);
-    LOGI(ATAG, "Pre rotated: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Pre rotated: %.2f ms", (clock() - start) / 1000.0);
     detectAndDraw(*frame, classifier, false);
     rotate(*frame, *frame, ROTATE_90_COUNTERCLOCKWISE);
-    LOGI(ATAG, "End: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "End: %.2f ms", (clock() - start) / 1000.0);
 }
 
 void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
-    LOGI(ATAG, "Detection Start: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection Start: %.2f ms", (clock() - start) / 1000.0);
     double time = 0;
     vector<Rect> faces, faces2;
     const static Scalar colors[] =
@@ -46,16 +49,16 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
     Mat gray, small_gray;
 
     cvtColor(frame, gray, COLOR_BGR2GRAY);
-    LOGI(ATAG, "Detection Pre-gray: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection Pre-gray: %.2f ms", (clock() - start) / 1000.0);
 
     double fx = 180.0/frame.cols;
     int minSize = (int) (180*fx);
     resize(gray, small_gray, Size(), fx, fx, INTER_LINEAR);
-    LOGI(ATAG, "Detection Pre-resize: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection Pre-resize: %.2f ms", (clock() - start) / 1000.0);
     equalizeHist(small_gray, small_gray);
-    LOGI(ATAG, "Detection Pre-equal: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection Pre-equal: %.2f ms", (clock() - start) / 1000.0);
 
-    LOGI(ATAG, "Detection Processing: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection Processing: %.2f ms", (clock() - start) / 1000.0);
     time = (double) getTickCount();
     cascade.detectMultiScale(small_gray,
                              faces,
@@ -66,9 +69,9 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
                              Size((int) (small_gray.cols * 0.6), (int) (small_gray.rows * 0.6)));
 
     time = (double) getTickCount() - time;
-    LOGI(ATAG, "detection time = %g ms\n", time * 1000 / getTickFrequency());
+    LOGI(TAG, "detection time = %g ms\n", time * 1000 / getTickFrequency());
 
-    LOGI(ATAG, "Detection Draw: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection Draw: %.2f ms", (clock() - start) / 1000.0);
     for (size_t i = 0; i < faces.size(); i++) {
         Scalar color = colors[i % 8];
 
@@ -78,5 +81,5 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
         int h = (int) (faces[i].height / fx);
         rectangle(frame, Rect(tx, ty, w, h), color, 3, 8, 0);
     }
-    LOGI(ATAG, "Detection End: %.2f ms", (clock() - start) / 1000.0);
+    LOGI(TAG, "Detection End: %.2f ms", (clock() - start) / 1000.0);
 }

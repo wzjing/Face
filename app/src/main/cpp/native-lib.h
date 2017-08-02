@@ -13,8 +13,10 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp>
 
-#define ATAG "opencv_native"
-#define LOGI(TAG, format, ...) __android_log_print(ANDROID_LOG_INFO, TAG, format, ## __VA_ARGS__)
+#define TAG "opencv_native"
+#define LOGI(tag, format, ...) __android_log_print(ANDROID_LOG_INFO, tag, format, ## __VA_ARGS__)
+#define LOGD(tag, format, ...) __android_log_print(ANDROID_LOG_DEBUG, tag, format, ## __VA_ARGS__)
+#define LOGE(tag, format, ...) __android_log_print(ANDROID_LOG_ERROR, tag, format, ## __VA_ARGS__)
 
 using namespace cv;
 using namespace std;
@@ -22,18 +24,17 @@ using namespace std;
 CascadeClassifier classifier;
 bool loaded = false;
 
-/**
- * detect human face in a Mat
- * @param env   Java environment pointer
- * @param mat   Mat frame
- */
 extern "C"
-JNIEXPORT jobject JNICALL
-Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint w,
-                                                           jint h, jbyteArray data_);
+JNIEXPORT jintArray
+JNICALL
+Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
+                                                           jint col, int count, jbyteArray data_);
+
+void put(Mat* frame, int row, int col, int count, double* values);
 
 void detectFace(Mat *frame);
 
 void detectAndDraw( Mat& frame, CascadeClassifier& cascade, bool tryflip );
+
 
 #endif //FACE_NATIVE_LIB_H
