@@ -15,7 +15,6 @@ import android.widget.Toast
 import com.wzjing.face.customcamera.CameraActivity
 import com.wzjing.face.opencvcamera.CameraViewActivity
 import com.wzjing.face.opencvcamera.OpenCVCameraActivity
-import com.wzjing.face.opencvcamera.OriginCameraActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {

@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import org.jetbrains.anko.doAsyncResult
+import org.opencv.ml.LogisticRegression
 
 class CameraView : SurfaceView, SurfaceHolder.Callback {
     private val TAG = "CameraView"
@@ -21,14 +22,19 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-
     init {
-        mCacheBitmap = Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.ARGB_8888)
         camManager.previewListener = { w, h, data ->
+            Log.i(TAG, "YUV data: $w x $h = ${data.size}")
             val bitmap = doAsyncResult {
-                nativeProcess(w, h, data)
+                if (mCacheBitmap == null)
+                    mCacheBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565)
+                nativeProcess(h, w, data.size, data, mCacheBitmap!!)
+                mCacheBitmap
             }
-
+//            Log.d(TAG, "PreviewListener():")
+//            if (mCacheBitmap == null)
+//                mCacheBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565)
+//            nativeProcess(w, h, data.size, data, mCacheBitmap!!)
             drawFrame(bitmap.get())
 
         }
@@ -36,6 +42,7 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
     }
 
     private fun drawFrame(frame: Bitmap?) {
+        Log.i(TAG, "Drawing frame: ${if(frame == null) "null" else "frame"}");
         val canvas = holder.lockCanvas()
         assert(canvas == null) {
             if (canvas == null)
@@ -54,8 +61,16 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         camManager.closeCamera()
+        mCacheBitmap?.recycle()
+        mCacheBitmap = null
     }
 
-    private external fun nativeProcess(w: Int, h: Int, data: ByteArray): Bitmap
+    private external fun nativeProcess(row: Int, col: Int,count: Int, data: ByteArray, bitmap: Bitmap)
+
+    companion object {
+        init {
+            System.loadLibrary("native-lib")
+        }
+    }
 
 }

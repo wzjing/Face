@@ -1,20 +1,109 @@
+#include <android/bitmap.h>
 #include "native-lib.h"
 
 long start = 0;
 
-JNIEXPORT jintArray
-JNICALL
-Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
-                                                           jint col, int count, jbyteArray data_) {
-    double* values = (double*)env->GetPrimitiveArrayCritical(data_, 0);
-
-    auto frame = Mat((int) (w * 1.5), h, CV_16UC3);
-
-    env->ReleasePrimitiveArrayCritical(data_, values, 0);
+char* pix16(char * data) {
+    char pixs [16][255];
+    for (int i = 0; i < 16; i++) {
+        sprintf(pixs[i], "%s %02x", i<1?"":pixs[i-1], data[i]);
+    }
+    return pixs[15];
 }
 
-void put(Mat* frame, int row, int col, int count, double* values) {
+JNIEXPORT void
+JNICALL
+Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
+                                                           jint col, jint count, jbyteArray data_,
+                                                           jobject bitmap) {
+    LOGI(TAG, "nativeProcess()-----------------------------------------------");
+    char *data = (char *) env->GetPrimitiveArrayCritical(data_, 0);
 
+//    LOGI(TAG, "%-16s: %s", "origin", pix16(data));
+
+    // Generate new Mat
+    Mat frame = Mat((int) (row * 1.5), col, CV_8UC1);
+    LOGD(TAG, "nativeProcess(): Put mat data");
+    mat_put<char>(&frame, frame.rows, frame.cols, count, data);
+    LOGD(TAG, "frame info: row:%d col:%d, channel:%d", frame.rows, frame.cols, frame.channels());
+//    LOGI(TAG, "%-16s: %s", "frame", pix16(frame.data));
+    Mat rgb;
+    cvtColor(frame, rgb, COLOR_YUV2RGB_NV21, 3);
+    LOGD(TAG, "rgb info: row:%d col:%d, channel:%d", rgb.rows, rgb.cols, rgb.channels());
+//    LOGI(TAG, "%-16s: %s", "rgb", pix16(rgb.data));
+    env->ReleasePrimitiveArrayCritical(data_, data, JNI_ABORT);
+
+    // Get Bitmap data
+    if (bitmap == NULL) {
+        LOGE(TAG, "Bitmap is NULL");
+        return;
+    }
+    AndroidBitmapInfo bmp_info = {0};
+    if (AndroidBitmap_getInfo(env, bitmap, &bmp_info) < 0) {
+        LOGD(TAG, "nativeProcess(): Unable to get bitmap info");
+        return;
+    } else
+        LOGD(TAG, "nativeProcess(): Bitmap Info: %d x %d <format: %d>", bmp_info.width, bmp_info.height,
+             bmp_info.format);
+    LOGD(TAG, "nativeProcess(): got Bitmap info");
+    void *bmp_pixels = 0;
+    if (AndroidBitmap_lockPixels(env, bitmap, &bmp_pixels) < 0) {
+        LOGE(TAG, "nativeProcess(): Unable to lock bitmap pixels");
+        return;
+    } else
+        LOGD(TAG, "nativeProcess(): got Bitmap pixels");
+
+    if (!bmp_pixels) {
+        LOGE(TAG, "nativeProcess(): didn't get any pixels");
+        return;
+    }
+
+    LOGE(TAG, "BMP before: %s", pix16((char*)bmp_pixels));
+    // Copy data to bitmap
+    LOGD(TAG, "nativeProcess(): creating tmp Mat");
+    Mat tmp(bmp_info.height, bmp_info.width, CV_8UC2, bmp_pixels);
+    LOGD(TAG, "nativeProcess(): copying data");
+    cvtColor(rgb, tmp, COLOR_RGB2BGR565, 3);
+    LOGD(TAG, "nativeProcess(): copy finished");
+    LOGD(TAG, "tmp info: row:%d col:%d, channel:%d", tmp.rows, tmp.cols, tmp.channels());
+//    LOGI(TAG, "%-16s: %s", "tmp", pix16(tmp.data));
+
+    LOGE(TAG, "BMP after: %s", pix16((char*)bmp_pixels));
+    AndroidBitmap_unlockPixels(env, bitmap);
+    LOGD(TAG, "nativeProcess(): return");
+}
+
+template<typename T>
+void mat_put(Mat *m, int row, int col, int count, char *buff) {
+    LOGD(TAG, "mat_put(): T size: %d", sizeof(T));
+
+    if (!m) return;
+    if (!buff) return;
+
+    LOGD(TAG, "mat_put(): Step 1");
+    count *= sizeof(T);
+    int rest = ((m->rows - row) * m->cols - col) * (int) m->elemSize();
+    if (count > rest) count = rest;
+
+    LOGD(TAG, "mat_put(): Step 3");
+    if (m->isContinuous()) {
+        memcpy(m->ptr(row, col), buff, count);
+    } else {
+        // row by row
+        int num = (m->cols - col) * (int) m->elemSize(); // 1st partial row
+        if (count < num) num = count;
+        uchar *data = m->ptr(row++, col);
+        while (count > 0) {
+            memcpy(data, buff, num);
+            count -= num;
+            buff += num;
+            num = m->cols * (int) m->elemSize();
+            if (count < num) num = count;
+            data = m->ptr(row++, 0);
+        }
+    }
+
+    LOGD(TAG, "mat_put(): Finished");
 }
 
 void detectFace(Mat *frame) {
@@ -51,8 +140,8 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
     cvtColor(frame, gray, COLOR_BGR2GRAY);
     LOGI(TAG, "Detection Pre-gray: %.2f ms", (clock() - start) / 1000.0);
 
-    double fx = 180.0/frame.cols;
-    int minSize = (int) (180*fx);
+    double fx = 180.0 / frame.cols;
+    int minSize = (int) (180 * fx);
     resize(gray, small_gray, Size(), fx, fx, INTER_LINEAR);
     LOGI(TAG, "Detection Pre-resize: %.2f ms", (clock() - start) / 1000.0);
     equalizeHist(small_gray, small_gray);
@@ -64,7 +153,8 @@ void detectAndDraw(Mat &frame, CascadeClassifier &cascade, bool tryflip) {
                              faces,
                              1.5,
                              3,
-                             0|CASCADE_SCALE_IMAGE,//|CASCADE_FIND_BIGGEST_OBJECT|CASCADE_DO_ROUGH_SEARCH
+                             0 |
+                             CASCADE_SCALE_IMAGE,//|CASCADE_FIND_BIGGEST_OBJECT|CASCADE_DO_ROUGH_SEARCH
                              Size(minSize, minSize),
                              Size((int) (small_gray.cols * 0.6), (int) (small_gray.rows * 0.6)));
 

@@ -25,12 +25,12 @@ CascadeClassifier classifier;
 bool loaded = false;
 
 extern "C"
-JNIEXPORT jintArray
+JNIEXPORT void
 JNICALL
 Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
-                                                           jint col, int count, jbyteArray data_);
+                                                           jint col, jint count, jbyteArray data_, jobject bitmap);
 
-void put(Mat* frame, int row, int col, int count, double* values);
+template <typename  T> void mat_put(Mat *m, int row, int col, int count, char *buff);
 
 void detectFace(Mat *frame);
 

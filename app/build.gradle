@@ -19,7 +19,7 @@ android {
     }
 
     compileSdkVersion 25
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.0"
     defaultConfig {
         applicationId "com.wzjing.face"
         minSdkVersion 14
