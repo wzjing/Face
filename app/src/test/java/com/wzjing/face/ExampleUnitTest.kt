@@ -1,5 +1,6 @@
 package com.wzjing.face
 
+import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.custom.async
 import org.jetbrains.anko.doAsync
 import org.junit.Test
@@ -52,22 +53,14 @@ class ExampleUnitTest {
 
     @Test
     fun thread() {
-
-        println("start")
-
-        backgroundTask {
-            blockMethod()
+        var n = 100f
+        bg {
+            for (i in 1..100)
+                n = (n+n)/3
+            println("n is $n")
         }
-        println("end")
-    }
-
-    fun<T> backgroundTask(work: suspend () -> T){
-    }
-
-    suspend fun blockMethod(){
-        for (i in 0..10 step 2) {
-            println("number $i")
-        }
+        Thread.sleep(20)
+        println("result: n is $n")
     }
 
 }
