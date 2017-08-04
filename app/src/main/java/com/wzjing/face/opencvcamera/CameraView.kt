@@ -6,17 +6,14 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import kotlinx.coroutines.experimental.Deferred
 import org.jetbrains.anko.coroutines.experimental.bg
-import org.jetbrains.anko.doAsync
 
 class CameraView : SurfaceView, SurfaceHolder.Callback {
     private val TAG = "CameraView"
-    private val TAGV = "CameraViewView"
 
     private var camManager: CamManager = CamManager.Companion.Builder(context).build()
-    private var mCacheBitmap = arrayListOf<Bitmap>()
-    private var frameIndex = 0
-    private var frameReady = false
+    private var mCacheBitmap: Bitmap
 
     private val paint: Paint = Paint()
     private var srcRect: Rect? = null
@@ -25,28 +22,46 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    var start: Double = System.currentTimeMillis().toDouble()
+    var start: Long = System.currentTimeMillis()
+    var bgProcess: Deferred<Bitmap>? = null
+    var lastTime: Long = 0
 
     init {
-        mCacheBitmap.add(Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.RGB_565))
+        mCacheBitmap = Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.RGB_565)
 
         holder.addCallback(this)
         camManager.previewListener = { w, h, data ->
-            start = System.currentTimeMillis().toDouble()
+            Log.d(TAG, "Frame time: ${System.currentTimeMillis() - lastTime}")
+            lastTime = System.currentTimeMillis()
+            start = System.currentTimeMillis()
+            processData(w, h, data)
+        }
+    }
 
-            bg {
-                frameReady = false
-                val currentIndex = frameIndex
-                val frame = bg {
-                    nativeProcess(h, w, data.size, data, mCacheBitmap[currentIndex])
-                    frameReady = true
-                    mCacheBitmap[currentIndex]
+    private fun processData(w: Int, h: Int, data: ByteArray) {
+        if (bgProcess != null) {
+            if (!bgProcess!!.isCompleted) {
+                bgProcess?.cancel()
+                Log.e(TAG, "Process time to long")
+            } else if (!((bgProcess?.isCancelled) ?: true)) {
+                bg {
+                    synchronized(mCacheBitmap) {
+                        drawFrame(mCacheBitmap)
+                    }
                 }
-                frameIndex = 1 - frameIndex
-                if (frameReady)
-                    drawFrame(frame.getCompleted())
+                Log.e(TAG, "Process drawing")
             }
-            Log.i(TAG, "Frame time: ${System.currentTimeMillis() - start} ms")
+            bgProcess = null
+
+        } else {
+            bgProcess = bg {
+                synchronized(mCacheBitmap) {
+                    val bgstart = System.currentTimeMillis()
+                    nativeProcess(h, w, data.size, data, mCacheBitmap)
+                    Log.i(TAG, "Process finished ${System.currentTimeMillis() - bgstart}ms")
+                    mCacheBitmap
+                }
+            }
         }
     }
 
@@ -91,8 +106,8 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         camManager.closeCamera()
-        mCacheBitmap.forEach{
-            it.recycle()
+        mCacheBitmap.apply {
+            recycle()
         }
     }
 

@@ -1,11 +1,16 @@
 package com.wzjing.face
 
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.yield
 import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.custom.async
 import org.jetbrains.anko.doAsync
 import org.junit.Test
 
 import org.junit.Assert.*
+import java.math.BigDecimal
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -13,16 +18,12 @@ import org.junit.Assert.*
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class ExampleUnitTest {
-    @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
-    }
 
     @Test
     fun array_test() {
         val array = arrayListOf<Int>(1, 2, 3, 4)
         for (i in array.indices) {
-            print("First is ${if (array.size > 0) array[0] else "null"}\n")
+            print("First is ${if (array.size > 0) array[0].toString() else "null"}\n")
             array.removeAt(0)
         }
     }
@@ -52,15 +53,44 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun thread() {
-        var n = 100f
-        bg {
-            for (i in 1..100)
-                n = (n+n)/3
-            println("n is $n")
+    fun thread() = runBlocking(CommonPool) {
+        val start = System.currentTimeMillis()
+        var n = 2
+        val job = bg {
+            for (i in 1..8) {
+                n += n
+                println("${System.currentTimeMillis() - start}ms Current n: $n")
+            }
+
+            println("${System.currentTimeMillis() - start}ms job: n is $n")
         }
-        Thread.sleep(20)
-        println("result: n is $n")
+        println("${System.currentTimeMillis() - start}ms Outer: n is $n")
+        job.join()
     }
 
+    @Volatile var number: BigDecimal = BigDecimal(0.0.toString())
+    @Test
+    fun syncTest() = runBlocking(CommonPool) {
+        val computeA = bg {
+            for (i in 1..20) {
+                calculate("A: $i")
+            }
+        }
+        val computeB = bg {
+            for (i in 1..20) {
+                calculate("B: $i")
+            }
+        }
+//        computeA.join()
+//        computeB.join()
+        delay(5000)
+    }
+
+    fun calculate(name: String) {
+        synchronized(number) {
+            for (j in 1..10000)
+                number = number.add(BigDecimal(0.0001.toString()))
+            println("$name: $number")
+        }
+    }
 }
