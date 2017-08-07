@@ -1,22 +1,13 @@
 package com.wzjing.face
 
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
-import kotlinx.coroutines.experimental.yield
+import kotlinx.coroutines.experimental.*
 import org.jetbrains.anko.coroutines.experimental.bg
-import org.jetbrains.anko.custom.async
 import org.jetbrains.anko.doAsync
 import org.junit.Test
 
 import org.junit.Assert.*
 import java.math.BigDecimal
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
 
     @Test
@@ -68,29 +59,49 @@ class ExampleUnitTest {
         job.join()
     }
 
-    @Volatile var number: BigDecimal = BigDecimal(0.0.toString())
+    val number = IntNumber(0)
     @Test
     fun syncTest() = runBlocking(CommonPool) {
-        val computeA = bg {
+        val computeA = launch(newSingleThreadContext("computeA")) {
             for (i in 1..20) {
                 calculate("A: $i")
+//                delay(10)
+                yield()
             }
         }
-        val computeB = bg {
+        val computeB = launch(newSingleThreadContext("computeB")) {
             for (i in 1..20) {
                 calculate("B: $i")
+//                delay(10)
+                yield()
             }
         }
-//        computeA.join()
-//        computeB.join()
-        delay(5000)
+        computeA.join()
+        computeB.join()
     }
 
-    fun calculate(name: String) {
+    suspend fun calculate(name: String) {
         synchronized(number) {
-            for (j in 1..10000)
-                number = number.add(BigDecimal(0.0001.toString()))
-            println("$name: $number")
+            for (j in 1..100000000)
+                number.set(number.value()+1)
+            println("%-10s: ${number.value()}".format(name))
+
+        }
+    }
+
+    inner class IntNumber(value: Long) {
+        private var number: Long = 0
+
+        init {
+            number = value
+        }
+
+        fun set(value: Long) {
+            number = value
+        }
+
+        fun value(): Long {
+            return number
         }
     }
 }

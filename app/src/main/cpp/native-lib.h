@@ -30,11 +30,7 @@ JNICALL
 Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
                                                            jint col, jint count, jbyteArray data_, jobject bitmap);
 
-template <typename  T> void mat_put(Mat *m, int row, int col, int count, char *buff);
-
-void detectFace(Mat *frame);
-
-void detectAndDraw( Mat& frame, CascadeClassifier& cascade, bool tryflip );
+void detectAndDraw( Mat& frame );
 
 
 #endif //FACE_NATIVE_LIB_H
