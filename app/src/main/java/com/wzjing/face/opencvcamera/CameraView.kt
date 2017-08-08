@@ -14,16 +14,18 @@ import kotlin.ByteArray
 
 class CameraView : SurfaceView, SurfaceHolder.Callback {
     private val TAG = "CameraView"
+    private val LCL = "LifeCycle"
 
     private var camManager: CamManager = CamManager.Companion.Builder(context).build()
     private var mCacheBitmap: Bitmap
     private var currentIndex = 0
+    public var enableFaceDetection = false
 
     private val paint: Paint = Paint()
     private var srcRect: Rect? = null
     private var dstRect: Rect? = null
 
-    private var job: Job
+    private var job: Job? = null
     private var threadRunning = true
     private var frameReady = false
     private val dataList = arrayListOf<ByteArray>()
@@ -34,41 +36,20 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
     var start: Long = System.currentTimeMillis()
 
     init {
+        Log.d(LCL, "Init()")
         mCacheBitmap = Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.RGB_565)
         dataList.add(ByteArray((camManager.size.width * camManager.size.height * 1.5).toInt()))
         dataList.add(ByteArray((camManager.size.width * camManager.size.height * 1.5).toInt()))
         holder.addCallback(this)
-        camManager.previewListener = { w, h, data ->
-            dataList[currentIndex] = data
-            frameReady = true
-        }
 
-        job = launch(newSingleThreadContext("nativeProcess")) {
-            var hasFrame = false
-            do {
-                start = System.currentTimeMillis()
-                synchronized(this@CameraView) {
-                    if (frameReady) {
-                        currentIndex = 1 - currentIndex
-                        frameReady = false
-                        hasFrame = true
-                    }
-                }
-                if (threadRunning && hasFrame) {
-                    if (dataList[1 - currentIndex].isNotEmpty())
-                        drawFrame(dataList[1 - currentIndex])
-                    hasFrame = false
-                }
-
-            } while (threadRunning)
-        }
     }
 
     private fun drawFrame(data: ByteArray?) {
-        Log.i(TAG, "drawFrame() start: ${System.currentTimeMillis() - start} ms")
+        start = System.currentTimeMillis()
+        Log.i(TAG, "drawFrame() start")
         if (data == null || data.isEmpty())
             return
-        nativeProcess(camManager.size.height, camManager.size.width, data.size, data, mCacheBitmap)
+        nativeProcess(camManager.size.height, camManager.size.width, data.size, data, mCacheBitmap, enableFaceDetection)
         Log.i(TAG, "drawFrame() nativeProcess Finished: ${System.currentTimeMillis() - start} ms")
         val canvas = holder.lockCanvas()
         assert(canvas == null) {
@@ -100,21 +81,46 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
+        Log.d(LCL, "surfaceCreated()")
         camManager.openCamera()
+        camManager.previewListener = { _, _, data ->
+            dataList[currentIndex] = data
+            frameReady = true
+        }
+
+        job = launch(newSingleThreadContext("nativeProcess")) {
+            var hasFrame = false
+            do {
+                synchronized(this@CameraView) {
+                    if (frameReady) {
+                        currentIndex = 1 - currentIndex
+                        frameReady = false
+                        hasFrame = true
+                    }
+                }
+                if (threadRunning && hasFrame) {
+                    if (dataList[1 - currentIndex].isNotEmpty())
+                        drawFrame(dataList[1 - currentIndex])
+                    hasFrame = false
+                }
+
+            } while (threadRunning)
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        Log.i(TAG, "Surface change")
+        Log.i(LCL, "surfaceChanged()")
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) = runBlocking(CommonPool) {
+        Log.i(LCL, "surfaceDestroyed()")
         threadRunning = false
-        job.join()
+        job?.join()
         mCacheBitmap.recycle()
         camManager.closeCamera()
     }
 
-    private external fun nativeProcess(row: Int, col: Int, count: Int, data: ByteArray, bitmap: Bitmap)
+    private external fun nativeProcess(row: Int, col: Int, count: Int, data: ByteArray, bitmap: Bitmap, faceDetection: Boolean)
 
     companion object {
         init {

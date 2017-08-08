@@ -24,7 +24,7 @@ JNIEXPORT void
 JNICALL
 Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
                                                            jint col, jint count, jbyteArray data_,
-                                                           jobject bitmap) {
+                                                           jobject bitmap, jboolean faceDetection) {
     start = clock();
     LOGI(TAG, "nativeProcess()-----------------------------------------------");
     char *data = (char *) env->GetPrimitiveArrayCritical(data_, 0);
@@ -75,8 +75,8 @@ Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject 
     cvtColor(rgb, bmpMat, COLOR_RGB2BGR565);
     LOGD(TAG, "bmpMat info: row:%d col:%d, channel:%d", bmpMat.rows, bmpMat.cols,
          bmpMat.channels());
-//    LOGI(TAG, "%-12s: %s", "bmpMat", pix16(bmpMat.data));
-    detectAndDraw(bmpMat);
+    if (faceDetection)
+        detectAndDraw(bmpMat);
     AndroidBitmap_unlockPixels(env, bitmap);
     LOGD(TAG, "nativeProcess(): finished %.2f ms", (clock() - start) / CLOCKS_PER_MILLSEC);
 }

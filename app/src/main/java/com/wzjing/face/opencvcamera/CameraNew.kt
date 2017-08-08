@@ -51,7 +51,6 @@ class CameraNew : CamManager{
         mCaptureSession?.close()
         mCameraDevice?.close()
         mImageReader?.close()
-
     }
 
     override fun startRecord() {

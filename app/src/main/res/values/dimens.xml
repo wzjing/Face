@@ -6,4 +6,8 @@
     <dimen name="normalImageButtonWidth">40dp</dimen>
     <dimen name="normalImageButtonHeight">40dp</dimen>
     <dimen name="normalImageButtonCorner">4dp</dimen>
+    <dimen name="bottomViewMargin">80dp</dimen>
+    <dimen name="normalViewVerticalMargin">30dp</dimen>
+    <dimen name="normalSwitchWidth">50dp</dimen>
+    <dimen name="normalSwitchHeight">20dp</dimen>
 </resources>

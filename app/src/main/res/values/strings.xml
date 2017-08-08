@@ -5,4 +5,6 @@
     <string name="audioRecBtn">Audio</string>
     <string name="imageButtonContent">ImageButton</string>
     <string name="shareVideoImageElement">videoImageElement</string>
+    <string name="faceDetectionOn">Detection On</string>
+    <string name="faceDetectionOff">Detection Off</string>
 </resources>

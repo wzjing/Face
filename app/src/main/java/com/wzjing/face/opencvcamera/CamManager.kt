@@ -52,6 +52,7 @@ abstract class CamManager (var context: Context, var size: Size = Size(1280, 720
     public companion object {
         public class Builder(var context: Context, val size: Size? = null) {
             public fun build(): CamManager {
+
                 if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP)
                     if (size != null) return CameraNew(context, size) else return CameraNew(context)
                 else

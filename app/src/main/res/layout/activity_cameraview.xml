@@ -4,7 +4,19 @@
     android:layout_height="match_parent">
 
     <com.wzjing.face.opencvcamera.CameraView
+        android:id="@+id/cameraView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <Switch
+        android:id="@+id/detectorSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/bottomViewMargin"
+        android:layout_marginRight="@dimen/normalViewVerticalMargin"
+        android:layout_marginEnd="@dimen/normalViewVerticalMargin" />
 
 </RelativeLayout>
