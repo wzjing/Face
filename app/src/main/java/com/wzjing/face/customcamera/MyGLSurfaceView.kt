@@ -11,11 +11,12 @@ import android.os.Environment
 import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
+import android.view.SurfaceView
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 
-class MyGLSurfaceView : GLSurfaceView {
+class MyGLSurfaceView : SurfaceView, SurfaceHolder.Callback {
 
     /* Constructor */
     constructor(context: Context) : super(context)
@@ -35,26 +36,21 @@ class MyGLSurfaceView : GLSurfaceView {
         mHolder = holder
         mHolder.addCallback(this)
         screenSize = Point(mContext.resources.displayMetrics.widthPixels, mContext.resources.displayMetrics.heightPixels)
-
-        setRenderer(MyRenderer())
     }
 
     /* Callback2 override */
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        super.surfaceCreated(holder)
         Log.d(TAG, "Surface created, holder is ${holder == null}")
         openCamera(holder)
 
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, w: Int, h: Int) {
-        super.surfaceChanged(holder, format, w, h)
         Log.d(TAG, "Surface changed")
 
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        super.surfaceDestroyed(holder)
         Log.d(TAG, "Surface destroyed")
         shooting = false
         releaseCamera()
@@ -115,15 +111,12 @@ class MyGLSurfaceView : GLSurfaceView {
         cam = Camera.open()
         val params = cam.parameters
         params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-        val size = getBestCameraResolution(params, 960)
+        val size = getBestCameraResolution(params, 1280)
         params.setPreviewSize(size.width, size.height)
         params.previewFormat = ImageFormat.YV12
-        params.previewFrameRate = 25
+        params.previewFrameRate = 30
         cam.parameters = params
-//        assert(holder == null) {
-//            Log.i(TAG, "Null")
-//            return
-//        }
+
         cam.setPreviewDisplay(holder)
 
         cam.setPreviewCallback { data, _ ->

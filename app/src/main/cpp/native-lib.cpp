@@ -70,6 +70,7 @@ Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject 
     }
     LOGI(TAG, "Step 2: %.2f ms", (clock() - start) / CLOCKS_PER_MILLSEC);
 
+    rotate(rgb, rgb, ROTATE_90_CLOCKWISE);
     // Copy data to bitmap
     Mat bmpMat(bmp_info.height, bmp_info.width, CV_8UC2, bmp_pixels);
     cvtColor(rgb, bmpMat, COLOR_RGB2BGR565);
@@ -109,7 +110,6 @@ void detectAndDraw(Mat &frame) {
     LOGI(TAG, "Detection Pre-resize: %.2f ms", (clock() - start) / CLOCKS_PER_MILLSEC);
     equalizeHist(small_gray, small_gray);
     LOGI(TAG, "Detection Pre-equal: %.2f ms", (clock() - start) / CLOCKS_PER_MILLSEC);
-    rotate(small_gray, small_gray, ROTATE_90_CLOCKWISE);
 
     classifier.detectMultiScale(small_gray,
                                 faces,
@@ -125,10 +125,15 @@ void detectAndDraw(Mat &frame) {
     for (size_t i = 0; i < faces.size(); i++) {
         Scalar color = colors[i % 8];
 
-        int tx = (int) (faces[i].y / ratio);
-        int ty = (int) ((small_gray.cols - faces[i].x - faces[i].width) / ratio);
-        int w = (int) (faces[i].height / ratio);
-        int h = (int) (faces[i].width / ratio);
+        // orignal unrotate mat draw position
+//        int tx = (int) (faces[i].y / ratio);
+//        int ty = (int) ((small_gray.cols - faces[i].x - faces[i].width) / ratio);
+//        int w = (int) (faces[i].height / ratio);
+//        int h = (int) (faces[i].width / ratio);
+        int tx = (int) (faces[i].x / ratio);
+        int ty = (int) (faces[i].y / ratio);
+        int w = (int) (faces[i].width / ratio);
+        int h = (int) (faces[i].height / ratio);
         rectangle(frame, Rect(tx, ty, w, h), color, 3, 8, 0);
     }
     LOGE(TAG, "Detect number: %d", faces.size());

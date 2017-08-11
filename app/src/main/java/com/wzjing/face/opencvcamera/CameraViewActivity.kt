@@ -1,24 +1,22 @@
 package com.wzjing.face.opencvcamera
 
-import android.graphics.PixelFormat
-import android.support.v7.app.AppCompatActivity
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
-import android.view.*
-import android.widget.RelativeLayout
+import android.support.v7.app.AppCompatActivity
+import android.view.View
+import android.view.ViewManager
 import com.wzjing.face.R
 import kotlinx.android.synthetic.main.activity_cameraview.*
-import org.jetbrains.anko.button
 import org.jetbrains.anko.custom.ankoView
-import org.jetbrains.anko.matchParent
-import org.jetbrains.anko.relativeLayout
 import org.jetbrains.anko.sdk25.coroutines.onCheckedChange
-import org.jetbrains.anko.verticalLayout
 
 class CameraViewActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= 16)
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+
         setContentView(R.layout.activity_cameraview)
 
         detectorSwitch.onCheckedChange { _, isChecked ->

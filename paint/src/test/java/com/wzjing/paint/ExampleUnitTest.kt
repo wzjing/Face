@@ -14,4 +14,13 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         assertEquals(4, 2 + 2)
     }
+
+    @Test
+    fun assertTest() {
+        var m = 11
+        assert(m == 10) {
+            println("failed")
+        }
+        println("success")
+    }
 }

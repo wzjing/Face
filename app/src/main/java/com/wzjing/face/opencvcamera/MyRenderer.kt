@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.GLUtils
+import android.opengl.Matrix
 import android.util.Log
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -12,6 +13,8 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 class MyRenderer(var frame: Bitmap) : GLSurfaceView.Renderer {
+
+    private val TAG = "MyRenderer"
 
     private var mProgram: Int? = null
     private var mTexSampleHandle: Int? = null
@@ -88,9 +91,15 @@ class MyRenderer(var frame: Bitmap) : GLSurfaceView.Renderer {
         }
     }
 
+    private var myRotateMatrix = FloatArray(16)
+    private var mMVPMatrix = FloatArray(16)
+    private var mViewMatrix = FloatArray(16)
+    private var mProjectionMatrix = FloatArray(16)
     override fun onDrawFrame(gl: GL10?) {
         val start = System.currentTimeMillis()
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT and GLES20.GL_DEPTH_BUFFER_BIT)
+
+
         GLES20.glUseProgram(mProgram!!)
         checkGLerror("glUseProgram")
 
@@ -105,13 +114,14 @@ class MyRenderer(var frame: Bitmap) : GLSurfaceView.Renderer {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
         checkGLerror("glActiveTexture")
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextures[0])
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, frame, 0)
         checkGLerror("glBindTexture")
         GLES20.glUniform1i(mTexSampleHandle!!, 0)
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
-        Log.i("MyRenderer", "drawFrame: ${System.currentTimeMillis()-start} ms")
+        Log.i(TAG, "drawFrame: ${System.currentTimeMillis()-start} ms")
     }
 
     companion object {

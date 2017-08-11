@@ -1,18 +1,19 @@
 package com.wzjing.face.opencvcamera
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.*
+import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
-import android.view.SurfaceView
-import kotlinx.coroutines.experimental.*
-import kotlin.ByteArray
+import com.wzjing.face.R
+import com.wzjing.paint.MyRenderer
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 
-class CameraView : SurfaceView, SurfaceHolder.Callback {
+class CameraView : GLSurfaceView, SurfaceHolder.Callback {
     private val TAG = "CameraView"
     private val LCL = "LifeCycle"
 
@@ -30,31 +31,49 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
     private var frameReady = false
     private val dataList = arrayListOf<ByteArray>()
 
+    // OpenGL ES
+    private var renderer: MyRenderer
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    var start: Long = System.currentTimeMillis()
+    private var testBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.will)
 
     init {
         Log.d(LCL, "Init()")
-        mCacheBitmap = Bitmap.createBitmap(camManager.size.width, camManager.size.height, Bitmap.Config.RGB_565)
+        mCacheBitmap = Bitmap.createBitmap(camManager.size.height, camManager.size.width, Bitmap.Config.RGB_565)
         dataList.add(ByteArray((camManager.size.width * camManager.size.height * 1.5).toInt()))
         dataList.add(ByteArray((camManager.size.width * camManager.size.height * 1.5).toInt()))
         holder.addCallback(this)
-
+        paint.isFilterBitmap = true
+        setEGLContextClientVersion(2)
+        renderer = MyRenderer(mCacheBitmap)
+        setRenderer(renderer)
+        renderMode = RENDERMODE_CONTINUOUSLY
     }
 
-    private fun drawFrame(data: ByteArray?) {
-        start = System.currentTimeMillis()
+    @Synchronized private fun glDrawFrame(data: ByteArray?) {
+        val start = System.currentTimeMillis()
+        Log.i(TAG, "drawFrame() start")
+        if (data == null || data.isEmpty())
+            return
+        nativeProcess(camManager.size.height, camManager.size.width, data.size, data, mCacheBitmap, enableFaceDetection)
+        Log.i(TAG, "drawFrame() nativeProcess: ${System.currentTimeMillis() - start} ms")
+        renderer.update(mCacheBitmap)
+        requestRender()
+        Log.i(TAG, "drawFrame() finished: ${System.currentTimeMillis() - start} ms")
+    }
+
+    @Synchronized private fun drawFrame(data: ByteArray?) {
+        val start = System.currentTimeMillis()
         Log.i(TAG, "drawFrame() start")
         if (data == null || data.isEmpty())
             return
         nativeProcess(camManager.size.height, camManager.size.width, data.size, data, mCacheBitmap, enableFaceDetection)
         Log.i(TAG, "drawFrame() nativeProcess Finished: ${System.currentTimeMillis() - start} ms")
         val canvas = holder.lockCanvas()
-        assert(canvas == null) {
-            if (canvas == null)
-                Log.e(TAG, "Canvas is null")
+        if (canvas == null) {
+            Log.e(TAG, "Canvas is null")
             return
         }
 
@@ -70,17 +89,19 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
                     (canvas.width + dw) / 2,
                     (canvas.height + dh) / 2)
         }
+        Log.i(TAG, "drawFrame() hardwareAcc: ${canvas?.isHardwareAccelerated}")
         Log.i(TAG, "drawFrame() mark1: ${System.currentTimeMillis() - start} ms")
-        canvas.drawColor(Color.BLACK)
-        canvas.rotate(90f, canvas.width / 2f, canvas.height / 2f)
+        canvas?.drawColor(Color.BLACK)
+        canvas?.rotate(90f, canvas.width / 2f, canvas.height / 2f)
         Log.i(TAG, "drawFrame() mark2: ${System.currentTimeMillis() - start} ms")
-        canvas.drawBitmap(mCacheBitmap, srcRect, dstRect, paint)
+        canvas?.drawBitmap(mCacheBitmap, srcRect, dstRect, paint)
         Log.i(TAG, "drawFrame() mark3: ${System.currentTimeMillis() - start} ms")
         holder.unlockCanvasAndPost(canvas)
         Log.i(TAG, "drawFrame() finished: ${System.currentTimeMillis() - start} ms")
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
+        super.surfaceCreated(holder)
         Log.d(LCL, "surfaceCreated()")
         camManager.openCamera()
         camManager.previewListener = { _, _, data ->
@@ -88,7 +109,7 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
             frameReady = true
         }
 
-        job = launch(newSingleThreadContext("nativeProcess")) {
+        job = launch(CommonPool) {
             var hasFrame = false
             do {
                 synchronized(this@CameraView) {
@@ -100,7 +121,7 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
                 }
                 if (threadRunning && hasFrame) {
                     if (dataList[1 - currentIndex].isNotEmpty())
-                        drawFrame(dataList[1 - currentIndex])
+                        glDrawFrame(dataList[1 - currentIndex])
                     hasFrame = false
                 }
 
@@ -108,16 +129,19 @@ class CameraView : SurfaceView, SurfaceHolder.Callback {
         }
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, w: Int, h: Int) {
+        super.surfaceChanged(holder, format, w, h)
         Log.i(LCL, "surfaceChanged()")
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) = runBlocking(CommonPool) {
+        super.surfaceDestroyed(holder)
         Log.i(LCL, "surfaceDestroyed()")
         threadRunning = false
         job?.join()
         mCacheBitmap.recycle()
         camManager.closeCamera()
+        testBitmap.recycle()
     }
 
     private external fun nativeProcess(row: Int, col: Int, count: Int, data: ByteArray, bitmap: Bitmap, faceDetection: Boolean)
