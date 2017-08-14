@@ -4,9 +4,17 @@
 #include <jni.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include <android/log.h>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui.hpp>
+
+using namespace cv;
+using namespace std;
 
 #define TAG "native-log"
 #define LOGD(tag, format, ...) __android_log_print(ANDROID_LOG_DEBUG, tag, format, ## __VA_ARGS__)
@@ -32,6 +40,12 @@ inline void printGlString(const char* name, GLenum v) {
     LOGI(TAG, "OpenGL ES: %s = %s", name, s);
 }
 
+typedef struct Frame {
+    int w;
+    int h;
+    void * pixels;
+} Frame;
+
 auto VERTEX_SHADER_CODE =
         "attribute vec4 a_position;\n"
         "attribute vec2 a_texcoord;\n"
@@ -48,9 +62,22 @@ auto FRAGMENT_SHADER_CODE =
         "  gl_FragColor = texture2D(tex_sampler, v_texcoord);\n"
         "}\n";
 
+float mTexVertex[8] = {0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+float mPosVertex[8] = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f};
+
+int mTexSamplehandle;
+int mTexCoordHandle;
+int mPosCoordHandle;
+
+GLuint mTextures[2];
+
+Frame frame;
+
 GLuint loadShader(GLenum shaderType, const char* pSource);
 
 GLuint createProgram(const char* pVertexSource, const char* pFragmentSource);
+
+void initTextureParams();
 
 bool setGraphics(int w, int h);
 
