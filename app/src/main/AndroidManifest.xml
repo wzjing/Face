@@ -30,9 +30,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/CameraTheme"/>
         <activity
-            android:name=".opencvcamera.OpenCVCameraActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".opencvcamera.CameraViewActivity"
             android:screenOrientation="portrait"
             android:theme="@style/CameraTheme"/>

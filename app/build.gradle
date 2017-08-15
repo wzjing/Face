@@ -29,8 +29,8 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS -lz"
-                abiFilters "armeabi-v7a"
+                cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS"
+                abiFilters "armeabi"
             }
         }
     }
@@ -54,11 +54,12 @@ android {
 
     productFlavors {
         arm {
-            versionNameSuffix "_armeabi-v7a"
+            versionNameSuffix "_armeabi"
             externalNativeBuild {
                 cmake {
-                    abiFilters "armeabi-v7a"
-                    cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS -lz -mfloat-abi=softfp -mfpu=neon"
+                    abiFilters "armeabi"
+//                    cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS -lz -mfloat-abi=softfp -mfpu=neon"
+                    cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS"
                 }
             }
             dimension "abi"

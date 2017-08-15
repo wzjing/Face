@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6.0)
+cmake_minimum_required(VERSION 3.4.0)
 
 add_library( native-lib
              SHARED
@@ -25,21 +25,22 @@ include_directories( ${CMAKE_SOURCE_DIR}/src/libs/opencv/include )
 
 message("Android ABI: ${ANDROID_ABI}")
 
-set(OPENCV_LIBS opencv_core opencv_highgui opencv_imgcodecs opencv_imgproc opencv_objdetect)
+set(OPENCV_LIBS opencv_highgui opencv_imgproc opencv_imgcodecs opencv_core opencv_objdetect)
 
 # arm abi libs is diffrent from x86 abi libs, we need make diffrent configuration
 if(ANDROID_ABI STREQUAL "armeabi-v7a" OR ANDROID_ABI STREQUAL "arm64-v8a")
     message("arm lib configuration")
     add_library( tegra_hal STATIC IMPORTED)
     set_target_properties( tegra_hal PROPERTIES IMPORTED_LOCATION ${JNI_LIBS_DIR}/libtegra_hal.a )
-    set(OPENCV_LIBS ${OPENCV_LIBS} tegra_hal )
+    set(OPENCV_LIBS ${OPENCV_LIBS} tegra_hal)
 endif()
 
+set(ANDROID_ALLOW_UNDEFINED_SYMBOLS TRUE)
+
 target_link_libraries( native-lib
-                       ${OPENCV_LIBS}
-                       pthread
-                       jnigraphics
                        log
+                       jnigraphics
                        android
                        EGL
-                       GLESv2)
+                       GLESv2
+                       ${OPENCV_LIBS})
