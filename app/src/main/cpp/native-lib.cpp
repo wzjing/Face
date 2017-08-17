@@ -1,4 +1,3 @@
-#include <android/bitmap.h>
 #include "native-lib.h"
 
 float start = 0.0f;
@@ -45,6 +44,12 @@ Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject 
     env->ReleasePrimitiveArrayCritical(data_, data, JNI_ABORT);
     LOGI(TAG, "Step 1: %.2f ms", (clock() - start) / CLOCKS_PER_MILLSEC);
 
+    if (faceDetection)
+        detectAndDraw(rgb);
+
+    update(rgb.cols, rgb.rows, rgb.data);
+
+    /*
     // Get Bitmap data
     if (bitmap == NULL) {
         LOGE(TAG, "Bitmap is NULL");
@@ -80,6 +85,7 @@ Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject 
         detectAndDraw(bmpMat);
     AndroidBitmap_unlockPixels(env, bitmap);
     LOGD(TAG, "nativeProcess(): finished %.2f ms", (clock() - start) / CLOCKS_PER_MILLSEC);
+     */
 }
 
 void detectAndDraw(Mat &frame) {

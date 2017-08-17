@@ -1,22 +1,17 @@
 #ifndef FACE_NATIVE_LIB_H
 #define FACE_NATIVE_LIB_H
 
+#include "GLESView.h"
 #include <string>
 #include <jni.h>
 #include <iostream>
 #include <bitset>
 #include <vector>
-#include <android/log.h>
 #include <android/bitmap.h>
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
-#include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp>
-
-#define TAG "opencv_native"
-#define LOGI(tag, format, ...) __android_log_print(ANDROID_LOG_INFO, tag, format, ## __VA_ARGS__)
-#define LOGD(tag, format, ...) __android_log_print(ANDROID_LOG_DEBUG, tag, format, ## __VA_ARGS__)
-#define LOGE(tag, format, ...) __android_log_print(ANDROID_LOG_ERROR, tag, format, ## __VA_ARGS__)
+#include "native-util.h"
 
 using namespace cv;
 using namespace std;

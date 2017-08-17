@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.6.0)
+cmake_minimum_required(VERSION 3.4.0)
 
 add_library( native-lib
              SHARED
-             src/main/cpp/native-lib.cpp )
-
-find_library( log-lib
-              log )
+             src/main/cpp/native-lib.cpp
+             src/main/cpp/GLESView.cpp
+             src/main/cpp/native-util.cpp )
 
 set(JNI_LIBS_DIR ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI})
 
@@ -21,17 +20,12 @@ set_target_properties( opencv_imgcodecs PROPERTIES IMPORTED_LOCATION ${JNI_LIBS_
 add_library( opencv_imgproc STATIC IMPORTED )
 set_target_properties( opencv_imgproc PROPERTIES IMPORTED_LOCATION ${JNI_LIBS_DIR}/libopencv_imgproc.a )
 
-add_library( opencv_java3 SHARED IMPORTED )
-set_target_properties( opencv_java3 PROPERTIES IMPORTED_LOCATION ${JNI_LIBS_DIR}/libopencv_java3.so )
-
 add_library( opencv_objdetect STATIC IMPORTED )
 set_target_properties( opencv_objdetect PROPERTIES IMPORTED_LOCATION ${JNI_LIBS_DIR}/libopencv_objdetect.a )
 
 include_directories( ${CMAKE_SOURCE_DIR}/src/libs/opencv/include )
 
-message("Android ABI: ${ANDROID_ABI}")
-
-set(OPENCV_LIBS opencv_core opencv_highgui opencv_imgcodecs opencv_imgproc opencv_java3 opencv_objdetect)
+set(OPENCV_LIBS opencv_core opencv_highgui opencv_imgcodecs opencv_imgproc opencv_objdetect)
 
 # arm abi libs is diffrent from x86 abi libs, we need make diffrent configuration
 if(ANDROID_ABI STREQUAL "armeabi-v7a" OR ANDROID_ABI STREQUAL "arm64-v8a")
@@ -42,6 +36,8 @@ if(ANDROID_ABI STREQUAL "armeabi-v7a" OR ANDROID_ABI STREQUAL "arm64-v8a")
 endif()
 
 target_link_libraries( native-lib
-                       ${log-lib}
                        ${OPENCV_LIBS}
-                       jnigraphics )
+                       log
+                       jnigraphics
+                       EGL
+                       GLESv2)

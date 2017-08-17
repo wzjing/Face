@@ -1,8 +1,36 @@
-#include "native-lib.h"
+#include "GLESView.h"
+
+auto VERTEX_SHADER_CODE =
+        "attribute vec4 a_position;\n"
+                "attribute vec2 a_texcoord;\n"
+                "varying vec2 v_texcoord;\n"
+                "void main() {\n"
+                "  gl_Position = a_position;\n"
+                "  v_texcoord = a_texcoord;\n"
+                "}\n";
+auto FRAGMENT_SHADER_CODE =
+        "precision mediump float;\n"
+                "uniform sampler2D tex_sampler;\n"
+                "varying vec2 v_texcoord;\n"
+                "void main() {\n"
+                "  gl_FragColor = texture2D(tex_sampler, v_texcoord);\n"
+                "}\n";
+
+float mTexVertex[8] = {0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+float mPosVertex[8] = {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f};
+
+GLuint mTexSamplehandle;
+GLuint mTexCoordHandle;
+GLuint mPosCoordHandle;
+
+GLuint mTextures[2];
+
+GLuint gProgram;
 
 JNIEXPORT void
-JNICALL Java_com_wzjing_paint_GLESView_initGLES(JNIEnv *env, jobject obj, jint w, jint h) {
-    setGraphics(w, h);
+JNICALL Java_com_wzjing_face_opencvcamera_GLESView_initGLES(JNIEnv *env, jobject obj, jint w,
+                                                            jint h, jobject bitmap) {
+    setGraphics(env, w, h, bitmap);
 }
 
 JNIEXPORT void
@@ -10,31 +38,11 @@ JNICALL Java_com_wzjing_face_opencvcamera_GLESView_step(JNIEnv *env, jobject obj
     renderFrame();
 }
 
-GLuint gProgram;
-GLuint gvPositionHandle;
-
-auto gVertexShader =
-        "attribute vec4 vPosition;\n"
-                "void main() {\n"
-                "  gl_Position = vPosition;\n"
-                "}\n";
-
-auto gFragmentShader =
-        "precision mediump float;\n"
-                "void main() {\n"
-                "  gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);\n"
-                "}\n";
-
-bool setGraphics(int w, int h) {
+bool setGraphics(JNIEnv* env, int w, int h, jobject bitmap) {
     printGlString("Version", GL_VERSION);
     printGlString("Vendor", GL_VENDOR);
     printGlString("Renderer", GL_RENDERER);
     printGlString("Extensions", GL_EXTENSIONS);
-
-    Mat mat = imread("/storage/emulated/0/picture.jpg", IMREAD_COLOR);
-    frame.h = mat.rows;
-    frame.h = mat.cols;
-    frame.pixels = mat.data;
 
     LOGI(TAG, "setupGraphics(%d, %d)", w, h);
     gProgram = createProgram(VERTEX_SHADER_CODE, FRAGMENT_SHADER_CODE);
@@ -43,30 +51,52 @@ bool setGraphics(int w, int h) {
         return false;
     }
 
-    glViewport(0, 0, w, h);
-    checkGlError("glViewport");
-
-    mTexSamplehandle = glGetUniformLocation(gProgram, "tex_sampler");
-    mTexCoordHandle = glGetAttribLocation(gProgram, "a_texcoord");
-    mPosCoordHandle = glGetAttribLocation(gProgram, "a_position");
+    mTexSamplehandle = (GLuint) glGetUniformLocation(gProgram, "tex_sampler");
+    mTexCoordHandle = (GLuint) glGetAttribLocation(gProgram, "a_texcoord");
+    mPosCoordHandle = (GLuint) glGetAttribLocation(gProgram, "a_position");
 
     glGenTextures(2, mTextures);
     checkGlError("gen Textures");
     glBindTexture(GL_TEXTURE_2D, mTextures[0]);
     checkGlError("bind Textures");
-    // TODO: Add a Picture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_BYTE, frame.pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame.pixels);
     checkGlError("add a picture");
     initTextureParams();
+
+
+    glViewport(0, 0, w, h);
+    checkGlError("glViewport");
+
+    if (mPosVertex != NULL) {
+        float imgAspectRatio = (float)frame.w / frame.h;
+        float viewAspectRatio = (float)w / h;
+        float relativeAspectRatio = viewAspectRatio / imgAspectRatio;
+        float x0, y0, x1, y1;
+        if (relativeAspectRatio > 1.0f) {
+            x0 = -1.0f / relativeAspectRatio;
+            y0 = -1.0f;
+            x1 = 1.0f / relativeAspectRatio;
+            y1 = 1.0f;
+        } else {
+            x0 = -1.0f;
+            y0 = -relativeAspectRatio;
+            x1 = 1.0f;
+            y1 = relativeAspectRatio;
+        }
+        mPosVertex[0] = x0;
+        mPosVertex[1] = y0;
+        mPosVertex[2] = x1;
+        mPosVertex[3] = y0;
+        mPosVertex[4] = x0;
+        mPosVertex[5] = y1;
+        mPosVertex[6] = x1;
+        mPosVertex[7] = y1;
+    }
+
     return true;
 }
 
-const GLfloat gTriangleVertices[] = {0.0f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f};
-
-static float grey;
-
 void renderFrame() {
-    LOGD(TAG, "Rendering: %f", grey);
     long start = clock();
 
     // 1、Clear OpenGL
@@ -77,27 +107,29 @@ void renderFrame() {
     glUseProgram(gProgram);
     checkGlError("glUseProgram");
 
-    // 3、Set up position vertex
-    glVertexAttribPointer(gvPositionHandle, 2, GL_FLOAT, GL_FALSE, 0, gTriangleVertices);
-    checkGlError("glVertexAttribPointer");
-    glEnableVertexAttribArray(gvPositionHandle);
-    checkGlError("glVertexAttibArray");
+    // 3、vertex
+    glVertexAttribPointer(mTexCoordHandle, 2, GL_FLOAT, GL_FALSE, 0, mTexVertex);
+    checkGlError("TexVertex");
+    glEnableVertexAttribArray(mTexCoordHandle);
+    checkGlError("TexVertexHandle");
 
-    // Draw a shape
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
-    //checkGlError("glDrawArrays");
+    // 4、position
+    glVertexAttribPointer(mPosCoordHandle, 2, GL_FLOAT, GL_FALSE, 0, mPosVertex);
+    checkGlError("PosVertex");
+    glEnableVertexAttribArray(mPosCoordHandle);
+    checkGlError("PosVertexHandle");
 
-    //4、Enable Texture draw
+    //5、Enable Texture draw
     glActiveTexture(GL_TEXTURE0);
     checkGlError("Active texture");
     glBindTexture(GL_TEXTURE_2D, mTextures[0]);
     checkGlError("Bind texture");
-    // TODO: add a Picture
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_BYTE, frame.pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame.pixels);
     checkGlError("draw image");
     glUniform1i(mTexSamplehandle, 0);
     checkGlError("glUniform1i");
 
+    //5、Draw vertex
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     checkGlError("clear color");
     glClear(GL_COLOR_BUFFER_BIT);
@@ -107,7 +139,6 @@ void renderFrame() {
 
     LOGD(TAG, "OpenGL ES frame: %d", (int) ((clock() - start) / 1000));
 }
-
 
 GLuint loadShader(GLenum shaderType, const char *pSource) {
     GLuint shader = glCreateShader(shaderType);

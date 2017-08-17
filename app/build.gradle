@@ -30,7 +30,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS"
-                abiFilters "armeabi"
+                abiFilters "armeabi-v7a"
             }
         }
     }
@@ -54,10 +54,10 @@ android {
 
     productFlavors {
         arm {
-            versionNameSuffix "_armeabi"
+            versionNameSuffix "_armeabi-v7a"
             externalNativeBuild {
                 cmake {
-                    abiFilters "armeabi"
+                    abiFilters "armeabi-v7a"
 //                    cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS -lz -mfloat-abi=softfp -mfpu=neon"
                     cppFlags "-std=c++11 -fexceptions -D__STDC_FORMAT_MACROS"
                 }

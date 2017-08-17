@@ -26,7 +26,7 @@ JNIEXPORT void
 JNICALL Java_com_wzjing_paint_GLESView_initGLES(JNIEnv * env, jobject obj, jint w, jint h);
 
 JNIEXPORT void
-JNICALL Java_com_wzjing_paint_GLESView_step(JNIEnv * env, jobject);
+JNICALL Java_com_wzjing_face_opencvcamera_GLESView_step(JNIEnv *env, jobject);
 }
 
 inline void checkGlError(const char* op) {
