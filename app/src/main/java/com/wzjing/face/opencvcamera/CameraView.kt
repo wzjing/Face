@@ -89,12 +89,12 @@ class CameraView : GLSurfaceView, SurfaceHolder.Callback {
                     (canvas.width + dw) / 2,
                     (canvas.height + dh) / 2)
         }
-        Log.i(TAG, "drawFrame() hardwareAcc: ${canvas?.isHardwareAccelerated}")
+        Log.i(TAG, "drawFrame() hardwareAcc: ${canvas.isHardwareAccelerated}")
         Log.i(TAG, "drawFrame() mark1: ${System.currentTimeMillis() - start} ms")
-        canvas?.drawColor(Color.BLACK)
-        canvas?.rotate(90f, canvas.width / 2f, canvas.height / 2f)
+        canvas.drawColor(Color.BLACK)
+        canvas.rotate(90f, canvas.width / 2f, canvas.height / 2f)
         Log.i(TAG, "drawFrame() mark2: ${System.currentTimeMillis() - start} ms")
-        canvas?.drawBitmap(mCacheBitmap, srcRect, dstRect, paint)
+        canvas.drawBitmap(mCacheBitmap, srcRect, dstRect, paint)
         Log.i(TAG, "drawFrame() mark3: ${System.currentTimeMillis() - start} ms")
         holder.unlockCanvasAndPost(canvas)
         Log.i(TAG, "drawFrame() finished: ${System.currentTimeMillis() - start} ms")

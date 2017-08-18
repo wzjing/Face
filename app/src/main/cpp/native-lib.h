@@ -22,7 +22,7 @@ bool loaded = false;
 extern "C"
 JNIEXPORT void
 JNICALL
-Java_com_wzjing_face_opencvcamera_CameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
+Java_com_wzjing_face_opencvcamera_GLCameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
                                                            jint col, jint count, jbyteArray data_, jobject bitmap, jboolean faceDetection);
 
 void detectAndDraw( Mat& frame );

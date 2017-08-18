@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.wzjing.face.opencvcamera
 
 import android.content.Context

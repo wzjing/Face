@@ -27,7 +27,7 @@ class CameraViewActivity : AppCompatActivity() {
 
     }
 
-    public inline fun ViewManager.cameraView() = cameraView{}
-    public inline fun ViewManager.cameraView(init: CameraView.()->Unit) = ankoView({CameraView(it)}, R.style.AppTheme, init)
+    fun ViewManager.cameraView() = cameraView{}
+    inline fun ViewManager.cameraView(init: CameraView.()->Unit) = ankoView({CameraView(it)}, R.style.AppTheme, init)
 
 }

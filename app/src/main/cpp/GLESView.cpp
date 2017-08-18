@@ -28,13 +28,13 @@ GLuint mTextures[2];
 GLuint gProgram;
 
 JNIEXPORT void
-JNICALL Java_com_wzjing_face_opencvcamera_GLESView_initGLES(JNIEnv *env, jobject obj, jint w,
+JNICALL Java_com_wzjing_face_opencvcamera_GLCameraView_initGLES(JNIEnv *env, jobject obj, jint w,
                                                             jint h, jobject bitmap) {
     setGraphics(env, w, h, bitmap);
 }
 
 JNIEXPORT void
-JNICALL Java_com_wzjing_face_opencvcamera_GLESView_step(JNIEnv *env, jobject obj) {
+JNICALL Java_com_wzjing_face_opencvcamera_GLCameraView_step(JNIEnv *env, jobject obj) {
     renderFrame();
 }
 
@@ -67,31 +67,29 @@ bool setGraphics(JNIEnv* env, int w, int h, jobject bitmap) {
     glViewport(0, 0, w, h);
     checkGlError("glViewport");
 
-    if (mPosVertex != NULL) {
-        float imgAspectRatio = (float)frame.w / frame.h;
-        float viewAspectRatio = (float)w / h;
-        float relativeAspectRatio = viewAspectRatio / imgAspectRatio;
-        float x0, y0, x1, y1;
-        if (relativeAspectRatio > 1.0f) {
-            x0 = -1.0f / relativeAspectRatio;
-            y0 = -1.0f;
-            x1 = 1.0f / relativeAspectRatio;
-            y1 = 1.0f;
-        } else {
-            x0 = -1.0f;
-            y0 = -relativeAspectRatio;
-            x1 = 1.0f;
-            y1 = relativeAspectRatio;
-        }
-        mPosVertex[0] = x0;
-        mPosVertex[1] = y0;
-        mPosVertex[2] = x1;
-        mPosVertex[3] = y0;
-        mPosVertex[4] = x0;
-        mPosVertex[5] = y1;
-        mPosVertex[6] = x1;
-        mPosVertex[7] = y1;
+    float imgAspectRatio = (float) frame.w / frame.h;
+    float viewAspectRatio = (float) w / h;
+    float relativeAspectRatio = viewAspectRatio / imgAspectRatio;
+    float x0, y0, x1, y1;
+    if (relativeAspectRatio > 1.0f) {
+        x0 = -1.0f / relativeAspectRatio;
+        y0 = -1.0f;
+        x1 = 1.0f / relativeAspectRatio;
+        y1 = 1.0f;
+    } else {
+        x0 = -1.0f;
+        y0 = -relativeAspectRatio;
+        x1 = 1.0f;
+        y1 = relativeAspectRatio;
     }
+    mPosVertex[0] = x0;
+    mPosVertex[1] = y0;
+    mPosVertex[2] = x1;
+    mPosVertex[3] = y0;
+    mPosVertex[4] = x0;
+    mPosVertex[5] = y1;
+    mPosVertex[6] = x1;
+    mPosVertex[7] = y1;
 
     return true;
 }
