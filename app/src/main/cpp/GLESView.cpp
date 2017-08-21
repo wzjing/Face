@@ -59,7 +59,7 @@ bool setGraphics(JNIEnv* env, int w, int h, jobject bitmap) {
     checkGlError("gen Textures");
     glBindTexture(GL_TEXTURE_2D, mTextures[0]);
     checkGlError("bind Textures");
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame.pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_BYTE, frame.pixels);
     checkGlError("add a picture");
     initTextureParams();
 
@@ -122,7 +122,7 @@ void renderFrame() {
     checkGlError("Active texture");
     glBindTexture(GL_TEXTURE_2D, mTextures[0]);
     checkGlError("Bind texture");
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, frame.pixels);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame.w, frame.h, 0, GL_RGB, GL_UNSIGNED_BYTE, frame.pixels);
     checkGlError("draw image");
     glUniform1i(mTexSamplehandle, 0);
     checkGlError("glUniform1i");

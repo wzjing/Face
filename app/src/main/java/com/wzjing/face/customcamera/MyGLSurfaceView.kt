@@ -6,7 +6,6 @@ import android.content.Context
 import android.graphics.ImageFormat
 import android.graphics.Point
 import android.hardware.Camera
-import android.opengl.GLSurfaceView
 import android.os.Environment
 import android.util.AttributeSet
 import android.util.Log
@@ -24,11 +23,11 @@ class MyGLSurfaceView : SurfaceView, SurfaceHolder.Callback {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     /* Init */
-    val TAG = "MyGLSurfaceView"
-    var mContext: Context
-    var mHolder: SurfaceHolder
-    lateinit var cam: Camera
-    var screenSize: Point
+    private val TAG = "MyGLSurfaceView"
+    private var mContext: Context
+    private var mHolder: SurfaceHolder
+    private lateinit var cam: Camera
+    private var screenSize: Point
 
     init {
         Log.d(TAG, "init")
@@ -58,9 +57,9 @@ class MyGLSurfaceView : SurfaceView, SurfaceHolder.Callback {
     }
 
     /* Shooting control */
-    var shooting = false
-    var currentFrame = 1
-    var maxFrame = 125
+    private var shooting = false
+    private var currentFrame = 1
+    private var maxFrame = 125
     fun startShoot() {
         shooting = true
 
@@ -68,12 +67,12 @@ class MyGLSurfaceView : SurfaceView, SurfaceHolder.Callback {
         Log.i(TAG, "start shooting")
     }
 
-    fun stopShoot() {
+    private fun stopShoot() {
         shooting = false
         Log.i(TAG, "stop shooting")
     }
 
-    fun openFile(): OutputStream {
+    private fun openFile(): OutputStream {
         val parent = File(Environment.getExternalStorageDirectory(), "/yuv")
         if (!parent.exists())
             parent.mkdirs()
@@ -84,16 +83,16 @@ class MyGLSurfaceView : SurfaceView, SurfaceHolder.Callback {
     }
 
     /* data output */
-    fun writeBytes(bytes: ByteArray) {
+    private fun writeBytes(bytes: ByteArray) {
         Log.d(TAG, "Post to writting thread (${bytes.size})")
         frames.add(bytes)
     }
 
-    var frames = arrayListOf<ByteArray>()
-    val writingThread = Thread(Runnable {
+    private val frames = arrayListOf<ByteArray>()
+    private val writingThread = Thread(Runnable {
         val fis = openFile()
         while (shooting) {
-            if (frames.size == 0 || frames[0].isEmpty())
+            if (frames.isEmpty() || frames[0].isEmpty())
                 continue
             Log.i(TAG, "Writing bytes(${frames[0].size})")
             fis.write(frames[0])

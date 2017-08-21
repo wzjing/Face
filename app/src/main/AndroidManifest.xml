@@ -27,8 +27,7 @@
         </activity>
         <activity
             android:name=".customcamera.CameraActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/CameraTheme"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".opencvcamera.CameraViewActivity"
             android:screenOrientation="portrait"
