@@ -11,6 +11,7 @@ import android.support.v4.app.ActivityOptionsCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import com.wzjing.face.customcamera.CameraActivity
 import com.wzjing.face.opencvcamera.CameraViewActivity
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
         setContentView(R.layout.activity_main)
         videoRecBtn.setOnClickListener(this)
         audioRecBtn.setOnClickListener(this)

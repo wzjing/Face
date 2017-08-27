@@ -14,13 +14,11 @@ class GLESView(context: Context) : GLSurfaceView(context) {
     private val TAG = "GLESView"
 
     private val renderer = Renderer()
-    private val bitmap = BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher)
 
     init {
         setEGLContextClientVersion(2)
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
-        Log.i(TAG, "ByteCount: ${bitmap.byteCount} ARGB8888:${bitmap.width*bitmap.height*32/4} RGB565:${bitmap.width*bitmap.height*16/4}")
     }
 
     inner class Renderer: GLSurfaceView.Renderer {
@@ -29,7 +27,7 @@ class GLESView(context: Context) : GLSurfaceView(context) {
         }
 
         override fun onSurfaceChanged(gl: GL10?, width: Int, height: Int) {
-            initGLES(width, height, bitmap)
+            initGLES(width, height)
         }
 
         override fun onDrawFrame(gl: GL10?) {
@@ -38,7 +36,7 @@ class GLESView(context: Context) : GLSurfaceView(context) {
 
     }
 
-    external fun initGLES(w: Int, h: Int, bitmap: Bitmap)
+    external fun initGLES(w: Int, h: Int)
     external fun step()
 
     companion object {
