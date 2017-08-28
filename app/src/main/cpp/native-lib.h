@@ -1,31 +1,38 @@
 #ifndef FACE_NATIVE_LIB_H
 #define FACE_NATIVE_LIB_H
 
-#include "GLESView.h"
 #include <string>
 #include <jni.h>
 #include <iostream>
 #include <bitset>
 #include <vector>
-#include <android/bitmap.h>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/objdetect.hpp>
-#include "native-util.h"
+#include "native-utils.h"
+#include "opengles/gl-utils.h"
+#include "opencv/opencv-lib.h"
 
 using namespace cv;
 using namespace std;
 
-CascadeClassifier classifier;
-bool loaded = false;
-
 extern "C"
+{
 JNIEXPORT void
 JNICALL
-Java_com_wzjing_face_opencvcamera_GLCameraView_nativeProcess(JNIEnv *env, jobject instance, jint row,
-                                                           jint col, jint count, jbyteArray data_, jobject bitmap, jboolean faceDetection);
+Java_com_wzjing_face_opencvcamera_GLCameraView_nativeProcess(JNIEnv *env, jobject instance,
+                                                             jint row,
+                                                             jint col, jint count, jbyteArray data_,
+                                                             jobject bitmap,
+                                                             jboolean faceDetection);
 
-void detectAndDraw( Mat& frame );
+JNIEXPORT void
+JNICALL Java_com_wzjing_face_opencvcamera_GLCameraView_initGLES(JNIEnv *env, jobject obj, jint w,
+                                                                jint h, jobject bitmap);
 
+JNIEXPORT void
+JNICALL Java_com_wzjing_face_opencvcamera_GLCameraView_step(JNIEnv *env, jobject);
+}
+
+bool setGraphics(JNIEnv *env, int w, int h);
+
+void renderFrame();
 
 #endif //FACE_NATIVE_LIB_H

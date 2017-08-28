@@ -20,13 +20,8 @@ class GLCameraView : GLSurfaceView {
     private val LCL = "LifeCycle"
 
     private var camManager: CamManager = CamManager.Companion.Builder(context).build()
-    private var mCacheBitmap: Bitmap
     private var currentIndex = 0
     public var enableFaceDetection = false
-
-    private val paint: Paint = Paint()
-    private var srcRect: Rect? = null
-    private var dstRect: Rect? = null
 
     private var job: Job? = null
     private var threadRunning = true
@@ -39,33 +34,28 @@ class GLCameraView : GLSurfaceView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
 
-    private var testBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.will)
-
     init {
         Log.d(LCL, "Init()")
-        mCacheBitmap = Bitmap.createBitmap(camManager.size.height, camManager.size.width, Bitmap.Config.RGB_565)
         dataList.add(ByteArray((camManager.size.width * camManager.size.height * 1.5).toInt()))
         dataList.add(ByteArray((camManager.size.width * camManager.size.height * 1.5).toInt()))
         holder.addCallback(this)
-        paint.isFilterBitmap = true
         setEGLContextClientVersion(2)
         setRenderer(renderer)
         renderMode = RENDERMODE_CONTINUOUSLY
     }
 
     @Synchronized private fun glDrawFrame(data: ByteArray?) {
+        Log.i(TAG, "drawFrame()")
         val start = System.currentTimeMillis()
-        Log.i(TAG, "drawFrame() start")
         if (data == null || data.isEmpty())
             return
-        nativeProcess(camManager.size.height, camManager.size.width, data.size, data, mCacheBitmap, enableFaceDetection)
-        Log.i(TAG, "drawFrame() nativeProcess: ${System.currentTimeMillis() - start} ms")
+        nativeProcess(camManager.size.height, camManager.size.width, data.size, data, enableFaceDetection)
         Log.i(TAG, "drawFrame() finished: ${System.currentTimeMillis() - start} ms")
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
-        super.surfaceCreated(holder)
         Log.d(LCL, "surfaceCreated()")
+        super.surfaceCreated(holder)
         camManager.openCamera()
         camManager.previewListener = { _, _, data ->
             dataList[currentIndex] = data
@@ -73,6 +63,7 @@ class GLCameraView : GLSurfaceView {
         }
 
         job = launch(CommonPool) {
+            threadRunning = true
             var hasFrame = false
             do {
                 synchronized(this@GLCameraView) {
@@ -93,8 +84,10 @@ class GLCameraView : GLSurfaceView {
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, w: Int, h: Int) {
-        super.surfaceChanged(holder, format, w, h)
         Log.i(LCL, "surfaceChanged()")
+        super.surfaceChanged(holder, format, w, h)
+        camManager.openCamera()
+        job!!.start()
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) = runBlocking(CommonPool) {
@@ -102,9 +95,7 @@ class GLCameraView : GLSurfaceView {
         Log.i(LCL, "surfaceDestroyed()")
         threadRunning = false
         job?.join()
-        mCacheBitmap.recycle()
         camManager.closeCamera()
-        testBitmap.recycle()
     }
 
     inner class Renderer : GLSurfaceView.Renderer {
@@ -121,7 +112,7 @@ class GLCameraView : GLSurfaceView {
         }
     }
 
-    private external fun nativeProcess(row: Int, col: Int, count: Int, data: ByteArray, bitmap: Bitmap, faceDetection: Boolean)
+    private external fun nativeProcess(row: Int, col: Int, count: Int, data: ByteArray, faceDetection: Boolean)
     private external fun initGLES(w: Int, h: Int)
     private external fun step()
 
